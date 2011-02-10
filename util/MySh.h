@@ -5,6 +5,8 @@
 
 #include <iostream>
 #include <string>
+//modificaciones GNU/Linux
+#include <cstdlib>
 
 extern "C" {
 	#include <errno.h>

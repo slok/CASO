@@ -8,7 +8,8 @@ extern "C" {
 	#include <errno.h>
 }
 #include <iostream>
-
+//modificaciones GNU/Linux
+#include <cstdlib>
 namespace PracticaCaso
 {
 	void *thread_listener(void *arg);

@@ -30,7 +30,7 @@ namespace PracticaCaso
 			NameServer(const NameServer&);
 			NameServer & operator = (const NameServer &);
 			~NameServer();
-			string NameServer::translate(string dnsEntry);
+			string translate(string dnsEntry); //modificaciones GNU/Linux
 			friend ostream & operator << (ostream &os, NameServer &n);
 
 	};
