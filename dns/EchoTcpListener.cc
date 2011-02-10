@@ -40,9 +40,9 @@ int main() {
 	while (true) {
 		PracticaCaso::TcpClient* client = listener.acceptTcpClient();
 		
-		//string msg = client->receive();
-		//client->send(msg);
-		//client->close();
+		//string msg = client->receive(); //por cada cliente recibimos y lo guardamos (el string)
+		//client->send(msg); //enviamos de vuelta el mismo string
+		//client->close(); //cerramos la coenxion
 		
 		// MODIFICATION 2.3.5
 		PracticaCaso::EchoServerThread* t = new PracticaCaso::EchoServerThread(client);

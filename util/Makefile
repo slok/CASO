@@ -2,6 +2,7 @@
 # author: dipina@eside.deusto.es
 # g++ -shared  -o TcpListener.o libprueba.so
 CC=g++ -fPIC
+
 LDFLAGS=-shared -lm -lpthread 
 
 main: libesidesocket.so libesidethread.so libesidesh.so  

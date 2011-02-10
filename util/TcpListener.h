@@ -15,10 +15,10 @@ extern "C" {
 	#include <stdlib.h>
 	#include </usr/include/signal.h>
 	#include <errno.h>
-    //modificaciones GNU/Linux
-    #include <strings.h>
-    #include <string.h>
-    #include <unistd.h>
+	//modificaciones para GNU/Linux
+	#include <strings.h>
+	#include <string.h>
+	#include <unistd.h>
 }
 
 #include <iostream>

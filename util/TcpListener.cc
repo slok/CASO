@@ -115,7 +115,7 @@ namespace PracticaCaso
 		
 		// Before writting the content, write the size of the buffer sent
 		char bytes2SendBuf[50];
-		int n=sprintf (bytes2SendBuf, "$%ld*", bytes2Send); //modificaciones GNU/Linux
+		int n = sprintf(bytes2SendBuf,"$%ld*",bytes2Send);
 		write(this->client_socket, string(bytes2SendBuf).c_str(), n);
 		do {
 			int bytesSentThisTime = write(this->client_socket, buffer+bytesSent, bytes2Send-bytesSent);
