@@ -133,7 +133,7 @@ namespace PracticaCaso {
 }
 
 
-
+/*
 // global variable
 PracticaCaso::SQLiteMap * SQLiteMap_pointer;
 
@@ -149,9 +149,9 @@ void usage() {
 	cout << "Usage: SQLiteMap <name-mappings-db-file>" << endl;
 	exit(1);
 }
-/*
+
 int main(int argc, char** argv) {
-	//signal(SIGINT,ctrl_c);
+	signal(SIGINT,ctrl_c);
 
 	if (argc != 2) {
 		usage();
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
 	}
 	
 	delete SQLiteMap_pointer;
-    
+    */
 }
-*/
+
 
