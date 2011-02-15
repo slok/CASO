@@ -4,13 +4,15 @@
 #define __SQLITEMAP_H
 
 extern "C" {
-	#include <sqlite3.h>	
+	#include <sqlite3.h>
+    #include <stdio.h>	
 }
-
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <map>
 #include <vector>
+#include <cstdlib>
 
 using namespace std;
 
