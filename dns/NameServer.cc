@@ -9,10 +9,10 @@ extern "C" {
 
 namespace PracticaCaso {
 	NameServer::NameServer(int p, string m, bool leerCache): TcpListener(p) {
-		//cout << "Creating SQLiteMap " << endl;
-		// Process the contents of the mapping file
-		//this->sqliteMap = new SQLiteMap(m+"_cache.db");
-		//cout << "Creating SQLiteMap!!!" << endl;
+		cout << "Creating SQLiteMap " << endl;
+		//Process the contents of the mapping file
+		this->sqliteMap = new SQLiteMap(m+"_cache.db");
+		cout << "Creating SQLiteMap!!!" << endl;
 		this->leerCache = leerCache;
 		cout << "Calling to loadMappings" << endl;
 		this->loadMappings(m);
@@ -23,12 +23,12 @@ namespace PracticaCaso {
 		dns2IpPortMap = ns.dns2IpPortMap;
 		server_socket = ns.server_socket;
 		port = ns.port;
-		//sqliteMap = ns.sqliteMap;
+		sqliteMap = ns.sqliteMap;
 		leerCache = ns.leerCache;
 	}
 
 	NameServer::~NameServer() {
-		//delete this->sqliteMap;
+		delete this->sqliteMap;
 		cout << "NameServer destructor called" << endl;
 	}
 
@@ -40,7 +40,7 @@ namespace PracticaCaso {
 		dns2IpPortMap = rhs.dns2IpPortMap;
 		server_socket = rhs.server_socket;
 		port = rhs.port;
-		//sqliteMap = rhs.sqliteMap;
+		sqliteMap = rhs.sqliteMap;
 		leerCache = rhs.leerCache;
 		return *this;
 	}
@@ -72,7 +72,18 @@ namespace PracticaCaso {
 		}
 		in.close();
 
-		// TODO: If there is a .DB file with previously learned mappings load them into dns2IpPortMap
+		// [DONE] TODO: If there is a .DB file with previously learned mappings load them into dns2IpPortMap
+        if (this->leerCache)
+        {
+            map<string, string> tempMap = this->sqliteMap->getMap();
+            typedef map<string, string>::const_iterator CI;
+            for (CI p = tempMap.begin(); p != tempMap.end(); ++p) 
+            {
+                this->dns2IpPortMap[p->first] = p->second;
+            }
+        }
+        
+        
 	}
 
 	string NameServer::delegateExternalDnsServer(string serverDetails, string dnsName) {
@@ -116,7 +127,8 @@ namespace PracticaCaso {
 						if (npos>0 && (npos<dnsName.length())) {
 							cout << "Child Name server to process request: " << p->first << endl;
 							string ipPortTemp = delegateExternalDnsServer(p->second, dnsName);
-							// TODO: cache the already resolved names in other DNS servers both in memory and sqlite3
+							// [DONE]TODO: cache the already resolved names in other DNS servers both in memory and sqlite3
+                            this->sqliteMap->set(dnsName, ipPortTemp);
 							return ipPortTemp;
 						}
 					}
@@ -130,7 +142,8 @@ namespace PracticaCaso {
 					if (this->dns2IpPortMap.find(segment) != this->dns2IpPortMap.end()) {
 						cout << "Parent Name server to process request: " << segment << ": " << this->dns2IpPortMap[segment] << endl;
 						string ipPortTemp = delegateExternalDnsServer(this->dns2IpPortMap[segment], dnsName);
-						// TODO: cache the already resolved names in other DNS servers both in memory and sqlite3
+						// [DONE]TODO: cache the already resolved names in other DNS servers both in memory and sqlite3
+                        this->sqliteMap->set(dnsName, ipPortTemp);
 						return ipPortTemp;
 					} else {
 						npos = segment.find(".");
@@ -183,7 +196,7 @@ void ctrl_c(int)
 
 
 void usage() {
-	cout << "Usage: NameServer <port> <name-mappings-file>" << endl;
+	cout << "Usage: NameServer <port> <name-mappings-file> [False]" << endl;
 	exit(1);
 }
 
@@ -200,12 +213,21 @@ void processClientRequest(PracticaCaso::TcpClient *dnsClient, PracticaCaso::Name
 
 int main(int argc, char** argv) {
 	signal(SIGINT,ctrl_c);
-
-	if (argc != 3) {
+    bool leer = true;
+    //[DONE] TODO false argument for reading cache
+	if (argc < 3 ) {
 		usage();
 	}
-
-	PracticaCaso::NameServer nameServer(atoi(argv[1]), (string)argv[2], false);
+    //if the last argument is false and there are 4 arguments
+    if (argc == 4 && (strcmp(argv[3], "false") == 0))
+    {
+        leer = false;
+        cout << "es false??: " << argv[3];
+    }
+        
+    
+    
+	PracticaCaso::NameServer nameServer(atoi(argv[1]), (string)argv[2], leer);
 	cout << "NameServer instance: " << endl << nameServer << endl;
 	// MODIFICATION 2.3.6
 	nameServer_pointer = &nameServer;

@@ -170,7 +170,7 @@ namespace PracticaCaso {
 			// Parse a little bit event parameters.
 			// Three parameters: Command, Payload [dnsName or IpPort string], and random verification-code.
 			ins >> command >> payload >> code;
-			
+			//llamada a mdns_management
 		}	
 	}
 
@@ -186,7 +186,7 @@ namespace PracticaCaso {
 		map<string, string>::iterator p;
 		string dnsValue;
 		// Begin management utility function.
-
+        //if else
 	}
 
 	void mNameServer::mdns_manage_response(string cmd, string payload, string code) {
@@ -217,7 +217,7 @@ namespace PracticaCaso {
 	// If the requested dnsName is in the local table, response. If don't, not to.
 	// Send the good MDNS_RESPONSE.
 	// If the requested dnsName is not in the local table, don't do anything.
-	// It can be interesting to use a MDNS_ERROR RESPONSE, but with some overhead.	
+	// It can be interesting to use a MDNS_ERROR RESPONSE, but with some overhead.
 
 	}
 

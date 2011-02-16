@@ -1,7 +1,7 @@
 # Makefile
 # author: dipina@eside.deusto.es
 CC=g++
-LDFLAGS=-L../util -lm -lpthread -lesidesocket -lesidethread 
+LDFLAGS=-L../util -lm -lpthread -lesidesocket -lesidethread -lesidesqlite -lsqlite3 -ldl
 INCLUDE=-I../util
 
 main: EchoTcpListener EchoTcpClient NameServer NameClient
