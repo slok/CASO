@@ -59,7 +59,7 @@ namespace PracticaCaso {
             } else {
                 // sqlite3 returns one extra row with the column headers
                 
-                for (int i=0; i<=nrow; i++) 
+                for (int i=1; i<=nrow; i++) 
                 {
                     this->dns2IpPortMap[result[i*ncol]] = result[i*ncol+1];
                 }
@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
 	}
 	
 	delete SQLiteMap_pointer;
-    */
-}
+    
+}*/
 
 
