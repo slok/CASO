@@ -171,6 +171,7 @@ namespace PracticaCaso {
 			// Three parameters: Command, Payload [dnsName or IpPort string], and random verification-code.
 			ins >> command >> payload >> code;
 			//llamada a mdns_management
+            this->mdns_management(command, payload, code);
 		}	
 	}
 
@@ -185,26 +186,48 @@ namespace PracticaCaso {
 	void mNameServer::mdns_management(string cmd, string payload, string code) {
 		map<string, string>::iterator p;
 		string dnsValue;
-		// Begin management utility function.
-        //if else
+		// [DONE] Begin management utility function.
+        if( strcmp(cmd,"MDNS_REQUEST")== 0)
+        {
+            this->mdns_manage_request(cmd, payload, code);
+        }
+        else
+        {
+            this->mdns_manage_response(cmd, payload, code);
+        }
 	}
 
 	void mNameServer::mdns_manage_response(string cmd, string payload, string code) {
-	cout << "mdns_management: MDNS_RESPONSE received" << endl;
+        cout << "mdns_management: MDNS_RESPONSE received" << endl;
 
-	// Check if there is any pending query.
-	// The arrived MDNS_RESPONSE may be addressed to me.
-	// And then check if the MDNS_RESPONSE corresponds to pendingQuery. Use random code.
-	// satisfiedQuery establishes a default FIRST-FIT criterion. Other methods are welcome. */
-	// Yes, there was a MDNS_RESPONSE, but not for me. This MDNS_RESPONSE can flow, or it  can crash... be the mdns_response, my friend. 
-	// It they don't come to me, snoopy cache can be implemented for efficiency. 
-	// Warning! Man-in-the-middle poisoning attacks enabling.
-	// Query cache
-	// More MDNS_RESPONSES can come to me, or not to me. First approach, ignore them.
-	// If they come to me, combination methods can be accomplished for completion.
-	// It they don't come to me, snoopy cache can be implemented for efficiency. 
-	// Warning! Man-in-the-middle poisoning attacks enabling.
-	// Query cache
+        //[DONE] Check if there is any pending query.
+        if(strcmp(this->pendingQuery,"") != 0 || this->pendingQuery != NULL) //there are pendig queries
+        {
+            // The arrived MDNS_RESPONSE may be addressed to me.
+            // And then check if the MDNS_RESPONSE corresponds to pendingQuery. Use random code.
+            if(strcmp(this->pendingQueryCode, code) == 0)
+            {
+                // satisfiedQuery establishes a default FIRST-FIT criterion. Other methods are welcome. */
+                this->solvedQuery = payload;
+                this->pendingQuery = "";
+                this->satisfiedQuery = true; 
+            }
+            else
+                // Yes, there was a MDNS_RESPONSE, but not for me. This MDNS_RESPONSE can flow, or it  can crash... be the mdns_response, my friend. 
+            }
+            else
+            {
+                // It they don't come to me, snoopy cache can be implemented for efficiency. 
+                // Warning! Man-in-the-middle poisoning attacks enabling.
+                // Query cache
+                // More MDNS_RESPONSES can come to me, or not to me. First approach, ignore them.
+                // If they come to me, combination methods can be accomplished for completion.
+                // It they don't come to me, snoopy cache can be implemented for efficiency. 
+                // Warning! Man-in-the-middle poisoning attacks enabling.
+                // Query cache
+            }
+        }
+	
 
 	}
 			
