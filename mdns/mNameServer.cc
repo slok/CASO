@@ -171,7 +171,7 @@ namespace PracticaCaso {
 			// Three parameters: Command, Payload [dnsName or IpPort string], and random verification-code.
 			ins >> command >> payload >> code;
 			//llamada a mdns_management
-            this->mdns_management(command, payload, code);
+            this->client->mdns_management(command, payload, code);
 		}	
 	}
 
@@ -187,7 +187,7 @@ namespace PracticaCaso {
 		map<string, string>::iterator p;
 		string dnsValue;
 		// [DONE] Begin management utility function.
-        if( strcmp(cmd,"MDNS_REQUEST")== 0)
+        if( strcmp(cmd.c_str(), MDNS_REQUEST)== 0)
         {
             this->mdns_manage_request(cmd, payload, code);
         }
@@ -201,33 +201,27 @@ namespace PracticaCaso {
         cout << "mdns_management: MDNS_RESPONSE received" << endl;
 
         //[DONE] Check if there is any pending query.
-        if(strcmp(this->pendingQuery,"") != 0 || this->pendingQuery != NULL) //there are pendig queries
+        // The arrived MDNS_RESPONSE may be addressed to me.
+        // And then check if the MDNS_RESPONSE corresponds to pendingQuery. Use random code.
+        if((strcmp(this->pendingQueryCode.c_str(), code.c_str()) == 0) && (this->satisfiedQuery == false))
         {
-            // The arrived MDNS_RESPONSE may be addressed to me.
-            // And then check if the MDNS_RESPONSE corresponds to pendingQuery. Use random code.
-            if(strcmp(this->pendingQueryCode, code) == 0)
-            {
-                // satisfiedQuery establishes a default FIRST-FIT criterion. Other methods are welcome. */
-                this->solvedQuery = payload;
-                this->pendingQuery = "";
-                this->satisfiedQuery = true; 
-            }
-            else
-                // Yes, there was a MDNS_RESPONSE, but not for me. This MDNS_RESPONSE can flow, or it  can crash... be the mdns_response, my friend. 
-            }
-            else
-            {
-                // It they don't come to me, snoopy cache can be implemented for efficiency. 
-                // Warning! Man-in-the-middle poisoning attacks enabling.
-                // Query cache
-                // More MDNS_RESPONSES can come to me, or not to me. First approach, ignore them.
-                // If they come to me, combination methods can be accomplished for completion.
-                // It they don't come to me, snoopy cache can be implemented for efficiency. 
-                // Warning! Man-in-the-middle poisoning attacks enabling.
-                // Query cache
-            }
+            // satisfiedQuery establishes a default FIRST-FIT criterion. Other methods are welcome. */
+            this->solvedQuery = payload;
+            this->pendingQuery = "";
+            this->satisfiedQuery = true; 
         }
-	
+        else
+        {
+            // Yes, there was a MDNS_RESPONSE, but not for me. This MDNS_RESPONSE can flow, or it  can crash... be the mdns_response, my friend. 
+            // It they don't come to me, snoopy cache can be implemented for efficiency. 
+            // Warning! Man-in-the-middle poisoning attacks enabling.
+            // Query cache
+            // More MDNS_RESPONSES can come to me, or not to me. First approach, ignore them.
+            // If they come to me, combination methods can be accomplished for completion.
+            // It they don't come to me, snoopy cache can be implemented for efficiency. 
+            // Warning! Man-in-the-middle poisoning attacks enabling.
+            // Query cache
+        }
 
 	}
 			
@@ -236,11 +230,25 @@ namespace PracticaCaso {
 	string dnsValue;
 
 	// One MDNS_REQUEST received: you must lookup your table and answer or not.
-	// Lookup the local table. RFC doesn't recommend recursive looking up.
-	// If the requested dnsName is in the local table, response. If don't, not to.
-	// Send the good MDNS_RESPONSE.
-	// If the requested dnsName is not in the local table, don't do anything.
-	// It can be interesting to use a MDNS_ERROR RESPONSE, but with some overhead.
+    typedef map<string, string>::const_iterator CI;
+    CI iter;
+    iter = this->dns2IpPortMap.find(payload);
+    if (iter != this->dns2IpPortMap.end() )
+    {//lo tenemos
+        // Lookup the local table. RFC doesn't recommend recursive looking up.
+        // If the requested dnsName is in the local table, response. If don't, not to.
+        // Send the good MDNS_RESPONSE.
+        string responseStr = MDNS_RESPONSE + " " + iter->second + " " + code;
+        this->queryWrapper->send(responseStr);
+        
+    }
+    else
+    {//no lo tenemos
+        // If the requested dnsName is not in the local table, don't do anything.
+        // It can be interesting to use a MDNS_ERROR RESPONSE, but with some overhead.
+    }
+        
+	
 
 	}
 

@@ -63,10 +63,10 @@ namespace PracticaCaso
 			mNameServer(const mNameServer&);
 			mNameServer & operator = (const mNameServer &);
 			~mNameServer();
-			string mNameServer::translate(string dnsEntry);
-			void mNameServer::mdns_management(string cmd, string payload, string code); 
-			void mNameServer::mdns_manage_response(string cmd, string payload, string code); 
-			void mNameServer::mdns_manage_request(string cmd, string payload, string code); 
+			string translate(string dnsEntry);
+			void mdns_management(string cmd, string payload, string code); 
+			void mdns_manage_response(string cmd, string payload, string code); 
+			void mdns_manage_request(string cmd, string payload, string code); 
 			friend ostream & operator << (ostream &os, mNameServer &n);
 	};
 

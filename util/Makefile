@@ -18,7 +18,7 @@ libesidesh.so: MySh.o popen.o
 	$(CC) $(LDFLAGS) MySh.o popen.o -o libesidesh.so
 
 libesidesqlite.so :  SQLiteMap.o
-	$(CC) $(LDFLAGS) SQLiteMap.o -o  libesidesqlite.so
+	$(CC) $(LDFLAGS) SQLiteMap.o -lsqlite3 -ldl -o  libesidesqlite.so
 
 SQLiteMap.o: SQLiteMap.cc SQLiteMap.h
 	$(CC) -c SQLiteMap.cc
