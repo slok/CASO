@@ -203,7 +203,7 @@ namespace PracticaCaso {
         //[DONE] Check if there is any pending query.
         // The arrived MDNS_RESPONSE may be addressed to me.
         // And then check if the MDNS_RESPONSE corresponds to pendingQuery. Use random code.
-        if((strcmp(this->pendingQueryCode.c_str(), code.c_str()) == 0) && (this->satisfiedQuery == false))
+        if((strcmp(this->pendingQueryCode.c_str(), code.c_str()) == 0) && !(this->satisfiedQuery))
         {
             // satisfiedQuery establishes a default FIRST-FIT criterion. Other methods are welcome. */
             this->solvedQuery = payload;
@@ -238,8 +238,12 @@ namespace PracticaCaso {
         // Lookup the local table. RFC doesn't recommend recursive looking up.
         // If the requested dnsName is in the local table, response. If don't, not to.
         // Send the good MDNS_RESPONSE.
-        string responseStr = MDNS_RESPONSE + " " + iter->second + " " + code;
-        this->queryWrapper->send(responseStr);
+                
+        ostringstream query;
+		// Build the MDNS_REQUEST. Three parameters: Command, dnsName, and random verification code.
+		query << MDNS_RESPONSE << " " << iter->second << " " << code;
+		cout << "###########creating response str: " << query.str() << " " << endl;
+		this->queryWrapper->send(query.str());
         
     }
     else
