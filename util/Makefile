@@ -47,4 +47,5 @@ popen.o: popen.cc popen.h
 clean:
 	rm *.o
 	rm *.so
+	rm *.dll
 
