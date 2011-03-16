@@ -5,7 +5,7 @@ CC=g++ -fPIC
 
 LDFLAGS=-shared -lm -lpthread 
 
-main: libesidesocket.so libesidethread.so libesidesh.so  libesidesqlite.so 
+main: libesidesocket.so libesidethread.so libesidesh.so  libesidesqlite.so libcasoaes.so 
 #SQLiteMap.bin
 
 libesidesocket.so: TcpListener.o
@@ -16,6 +16,12 @@ libesidethread.so: Thread.o
 
 libesidesh.so: MySh.o popen.o
 	$(CC) $(LDFLAGS) MySh.o popen.o -o libesidesh.so
+
+libcasoaes.so  :  AESUtil.o
+	$(CC) $(LDFLAGS) AESUtil.o -lcrypto -o  libcasoaes.so
+
+AESUtil.o: AESUtil.cpp AESUtil.h types.h
+	$(CC) -c AESUtil.cpp
 
 libesidesqlite.so :  SQLiteMap.o
 	$(CC) $(LDFLAGS) SQLiteMap.o -lsqlite3 -ldl -o  libesidesqlite.so

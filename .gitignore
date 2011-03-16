@@ -4,13 +4,20 @@
 *.lo
 *.o
 
+# Compiled headers
+*.gch
+
 # Compiled Dynamic libraries
 *.so
+*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+
+# Sqlite databases
+*.db
 
 #-------------------------------------Autotools
 # http://www.gnu.org/software/automake
