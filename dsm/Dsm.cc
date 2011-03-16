@@ -73,7 +73,41 @@ namespace PracticaCaso {
 	
 	// MODIFICACIÓN PRÁCTICA DSM: descripción en 3.3.5 (punto 2): 
 	// Nueva signature constructor: DsmDriver(string ipAddressNameServer, int portNameServer, string dmsServerName2Lookup); 
-	DsmDriver::DsmDriver(string DSMServerIPaddress, int DSMServerPort) {
+    DsmDriver::DsmDriver(string ipAddressNameServer, int portNameServer, string dmsServerName2Lookup)
+    {
+        PracticaCaso::TcpClient * client = new PracticaCaso::TcpClient();
+        
+        client->connect(ipAddressNameServer,  portNameServer);
+        client->send(dmsServerName2Lookup);
+        string response = "";
+        string ip = "";
+        int port = 0;
+        
+        response = client->receive();
+        
+        if(response.find("ERROR") != 0)
+        {
+            ip = response.substr(0, response.find(":"));
+            port = atoi((response.substr(response.find(":")+1)).c_str());
+            client->close();
+            delete client;
+            
+            this->observer = new DsmObserver(this);
+            this->observer->start();
+
+            this->connect(ip, port);
+            this->send("dsm_init");
+            this->nid = atoi((this->receive()).c_str());
+        }
+        else //error
+        {
+            cout << "The DMS name " << dmsServerName2Lookup << " could not be resolved." << endl;
+        }
+        
+        
+    }
+    
+    DsmDriver::DsmDriver(string DSMServerIPaddress, int DSMServerPort) {
 		// Lookup pop.deusto.es in NameServer
 		this->observer = new DsmObserver(this);
 		this->observer->start();
@@ -181,7 +215,7 @@ namespace PracticaCaso {
 					// TODO: not remove the break
 					break;
 				}
-			}
+			} //por aqui hacer signal
 		}
 	}
 

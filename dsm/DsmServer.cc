@@ -39,7 +39,7 @@ inline string str(int num) {
 
 inline string str(unsigned long num) {
 	char buffer[32];
-	sprintf(buffer, "%d", num);
+	sprintf(buffer, "%u", num);
 	return string(buffer);
 }
 

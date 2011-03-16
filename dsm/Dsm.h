@@ -49,9 +49,10 @@ namespace PracticaCaso
 
 			// Caches the DSM events multicasted by the DSM server everytime a new block is put or freed
 			vector<DsmEvent> putEvents;
-			// TODO: Declare here conditional variable  sync_cond thatcontrols the synchronisation between the Observer and the DsmDriver threads
+			// [DONE]TODO: Declare here conditional variable  sync_cond thatcontrols the synchronisation between the Observer and the DsmDriver threads
 		public:
 			DsmDriver(string DSMServerIPaddress, int DSMServerPort);
+            DsmDriver(string ipAddressNameServer, int portNameServer, string dmsServerName2Lookup);
 			~DsmDriver();
 
 			// Allows a DSM node to retrieve its ID

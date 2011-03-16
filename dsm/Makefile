@@ -1,6 +1,6 @@
 # Makefile
 # author: dipina@eside.deusto.es
-CC=g++
+CC=g++ -fPIC
 LDFLAGS=-L../util -lm -lpthread -lesidesocket -lesidethread
 INCLUDE=-I../util
 
@@ -9,6 +9,7 @@ main: libesidedsm.so DsmServer DsmTest MatrixEvenAdder MatrixOddAdder
 libesidedsm.so: Dsm.o
 	$(CC) -shared $(LDFLAGS) Dsm.o -o libesidedsm.so
 	cp libesidedsm.so libesidedsm.dll
+	cp ./libesidedsm* ../util
 	
 Dsm.o: Dsm.cc Dsm.h DsmTypes.h
 	$(CC) $(INCLUDE) -c Dsm.cc
