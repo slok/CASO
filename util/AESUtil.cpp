@@ -49,10 +49,15 @@ AESUtil::AESUtil(uint8_t* kd, uint32_t* s)
 
 uint8_t *AESUtil::encrypt(uint8_t *plainText, int *len)
 {
-    uint8_t *cipherText = new uint8_t();
-
     /* max ciphertext len for a n bytes of plaintext is n + AES_BLOCK_SIZE -1 bytes */
     int c_len = *len + AES_BLOCK_SIZE, f_len = 0;
+
+    uint8_t *cipherText = new uint8_t[c_len];
+    //uint8_t *cipherText = (uint8_t *)malloc(c_len);
+
+    /*std::cout << "clen:" << c_len << std::endl;
+    std::cout << " len:" << *len << std::endl;
+    std::cout << "flen:" << f_len << std::endl;*/
 
     /* allows reusing of 'e' for multiple encryption cycles */
     EVP_EncryptInit_ex(&this->en, NULL, NULL, NULL, NULL);
@@ -71,16 +76,63 @@ uint8_t *AESUtil::encrypt(uint8_t *plainText, int *len)
 
 uint8_t *AESUtil::decrypt(uint8_t *cipherText, int *len)
 {
-    uint8_t *plainText = new uint8_t();
-
     /* plaintext will always be equal to or lesser than length of ciphertext*/
     int p_len = *len, f_len = 0;
+    uint8_t *plainText = new uint8_t[p_len];
+    //uint8_t *plainText = (uint8_t *)malloc(p_len);
+
+    /*std::cout << " len:" << *len << std::endl;
+    std::cout << "plen:" << p_len << std::endl;
+    std::cout << "flen:" << f_len << std::endl;*/
 
     EVP_DecryptInit_ex(&this->de, NULL, NULL, NULL, NULL);
     EVP_DecryptUpdate(&this->de, plainText, &p_len, cipherText, *len);
+
     EVP_DecryptFinal_ex(&this->de, plainText+p_len, &f_len);
 
     *len = p_len + f_len;
 
     return plainText;
 }
+
+/*
+using namespace std;
+
+int main()
+{
+
+    //cout << "Hello world!" << endl;
+    uint32_t salt[] = {12345, 54321};
+    string tmp;
+    uint8_t * testText = NULL;
+    int len;
+    uint8_t *cifrado = NULL;
+    uint8_t *descifrado = NULL;
+
+    cout << "#############################################\n";
+    cout << "#Inserta un palabra a encriptar en AES 256: #\n";
+    cout << "#############################################\n";
+    cin >> tmp;
+    //tmp = "abcd";
+    testText = (uint8_t *) tmp.c_str();
+    //len = strlen((const char *)testText)+1;
+    len = tmp.size()+1;
+
+    AESUtil prueba((uint8_t *)"key secreta", salt);
+    cifrado = prueba.encrypt(testText, &len);
+    descifrado = prueba.decrypt(cifrado, &len);
+
+    cout << "************Resultados**********************\n";
+    cout << "key: " << prueba.getkeyData() << endl;
+    cout << "Text: " << testText << endl;
+    cout << "Crypted text(ASCII): "<< cifrado << endl;
+    //cout << "¿Crypted text(Hexadecimal)?: "<< (int*)cifrado << endl;
+    cout << "Decrypted text: "<< descifrado << endl;
+    cout << "********************************************\n";
+
+    delete cifrado;
+    delete descifrado;
+
+    return 0;
+}
+*/
