@@ -75,6 +75,10 @@ namespace PracticaCaso {
 	// Nueva signature constructor: DsmDriver(string ipAddressNameServer, int portNameServer, string dmsServerName2Lookup); 
     DsmDriver::DsmDriver(string ipAddressNameServer, int portNameServer, string dmsServerName2Lookup)
     {
+        //init pthread objects for the sync
+		pthread_mutex_init( &this->condMutex, NULL );
+        pthread_cond_init( &this->syncCond, NULL );
+        
         PracticaCaso::TcpClient * client = new PracticaCaso::TcpClient();
         
         client->connect(ipAddressNameServer,  portNameServer);
@@ -82,7 +86,7 @@ namespace PracticaCaso {
         string response = "";
         string ip = "";
         int port = 0;
-        
+    
         response = client->receive();
         
         if(response.find("ERROR") != 0)
@@ -108,8 +112,11 @@ namespace PracticaCaso {
     }
     
     DsmDriver::DsmDriver(string DSMServerIPaddress, int DSMServerPort) {
-		// Lookup pop.deusto.es in NameServer
-		this->observer = new DsmObserver(this);
+		//init pthread objects for the sync
+		pthread_mutex_init( &this->condMutex, NULL );
+        pthread_cond_init( &this->syncCond, NULL );
+        // Lookup pop.deusto.es in NameServer
+        this->observer = new DsmObserver(this);
 		this->observer->start();
 
 		this->connect(DSMServerIPaddress, DSMServerPort);
@@ -121,7 +128,10 @@ namespace PracticaCaso {
 
 
 	DsmDriver::~DsmDriver() {
-		ostringstream outs;  // Declare an output string stream.
+		
+        pthread_mutex_destroy( &this->condMutex );
+        pthread_cond_destroy( &this->syncCond );
+        ostringstream outs;  // Declare an output string stream.
 		outs << "dsm_exit " << this->nid;
 		this->send(outs.str());
 		string exitOK = this->receive();
@@ -200,7 +210,8 @@ namespace PracticaCaso {
 
 	void DsmDriver::dsm_notify(string cmd, string blockId) {
 		// MODIFICACIÓN PRÁCTICA DSM: seguir indicaciones de 3.3.5 (punto 3)
-		cout << "***NOTIFICATION: " << cmd << " " << blockId << endl;
+        
+        cout << "***NOTIFICATION: " << cmd << " " << blockId << endl;
 		if (cmd == "dsm_put") {
 			// Add the new DsmEvent received
 			DsmEvent dsmEvent;
@@ -215,8 +226,11 @@ namespace PracticaCaso {
 					// TODO: not remove the break
 					break;
 				}
-			} //por aqui hacer signal
+			}
 		}
+        pthread_mutex_lock( &this->condMutex);
+        pthread_cond_signal( &this->syncCond );
+        pthread_mutex_unlock( &this->condMutex);
 	}
 
 	void DsmDriver::dsm_wait(string blockId) {
@@ -232,7 +246,14 @@ namespace PracticaCaso {
 			if (!blockPutEventReceived) {
 				// TODO: use binary semaphore initialized to 0 for conditional synchronisation
 				// MODIFICACIÓN PRÁCTICA DSM: Seguir instrucciones de modificación 3.3.5.3
-				sleep(1);
+				
+                pthread_mutex_lock( &this->condMutex);
+                cout << " [Waiting] start waiting for a signal" << endl;
+                pthread_cond_wait( &this->syncCond, &this->condMutex );
+                cout << " [Waiting] stop waiting, signal received" << endl;
+                pthread_mutex_unlock( &this->condMutex);
+                
+                //sleep(1);
 			}
 		}
 	}
