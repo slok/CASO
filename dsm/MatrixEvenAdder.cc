@@ -7,12 +7,7 @@
 #define BUFFER_SIZE 1024
 
 void usage() {
-<<<<<<< HEAD
 	cout << "Usage: MatrixEvenAdder <port> <dns>" << endl;
-=======
-	cout << "Usage: MatrixOddAdder <port> <dns>" << endl;
->>>>>>> f69ea4756d84c91ee76807c2617a6b798154398c
-	exit(1);
 }
 
 
