@@ -114,16 +114,16 @@ namespace PracticaCaso {
 				cerr << "WARNING: attempt to create block " << blockId << " already existing by " << nid << "!!!" << endl;
 				//read block
                 pthread_rwlock_rdlock( &this->accessLock );
-                
                 DsmBlock tempBlock = this->blockMetadataMap[blockId];
-				if (tempBlock.size < size) {
+                //end read block
+                pthread_rwlock_unlock( &this->accessLock );
+                
+                if (tempBlock.size < size) {
 					cerr << "ERROR: impossible to reuse block " << blockId << " of size " << tempBlock.size << " < " << size << endl;
 					return 0;
 				} else {
 					return tempBlock.addr;
 				}
-                //end read block
-                pthread_rwlock_unlock( &this->accessLock );
 			}
 		} else {
 			cerr << "ERROR: attempt to create block " << blockId << " by non-registered node " << nid << "!!!" << endl;
@@ -215,7 +215,7 @@ namespace PracticaCaso {
                 	(this->blockMetadataMap).erase(blockId);
 					vector<DsmBlock> blocksRequested = (this->dsmNodeMap[nid]).dsmBlocksRequested;
 					for (vector<DsmBlock>::iterator it = blocksRequested.begin(); it!=blocksRequested.end(); ++it) {
-						if ( (blockMetadata.lastAccessNode == it->lastAccessNode) && 
+						if ( (blockMetadata.creatorNode == it->creatorNode) && 
 							 (blockMetadata.blockSize == it->blockSize) && 
 							 (blockMetadata.addr == it->addr)
 							) {

@@ -4,7 +4,7 @@ CC=g++ -fPIC
 LDFLAGS=-L../util -lm -lpthread -lesidesocket -lesidethread
 INCLUDE=-I../util
 
-main: libesidedsm.so DsmServer DsmTest MatrixEvenAdder MatrixOddAdder 
+main: libesidedsm.so DsmServer DsmTest MatrixEvenAdder MatrixOddAdder DsmTimeServer
 
 libesidedsm.so: Dsm.o
 	$(CC) -shared $(LDFLAGS) Dsm.o -o libesidedsm.so
@@ -26,6 +26,9 @@ MatrixEvenAdder: MatrixEvenAdder.o
 MatrixOddAdder: MatrixOddAdder.o
 	$(CC) MatrixOddAdder.o $(LDFLAGS) -L. -lesidedsm -o MatrixOddAdder
 
+DsmTimeServer: DsmTimeServer.o
+	$(CC) DsmTimeServer.o $(LDFLAGS) -L. -lesidedsm -o DsmTimeServer
+
 DsmServer.o: DsmServer.cc DsmServer.h DsmTypes.h
 	$(CC) $(INCLUDE) -c DsmServer.cc
 
@@ -37,6 +40,9 @@ MatrixEvenAdder.o: MatrixEvenAdder.cc
 	
 MatrixOddAdder.o: MatrixOddAdder.cc
 	$(CC) $(INCLUDE) -c MatrixOddAdder.cc
+	
+DsmTimeServer.o: DsmTimeServer.c
+	$(CC) $(INCLUDE) -c DsmTimeServer.c
 
 clean:
 	rm *.o
