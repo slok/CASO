@@ -215,7 +215,7 @@ namespace PracticaCaso {
                 	(this->blockMetadataMap).erase(blockId);
 					vector<DsmBlock> blocksRequested = (this->dsmNodeMap[nid]).dsmBlocksRequested;
 					for (vector<DsmBlock>::iterator it = blocksRequested.begin(); it!=blocksRequested.end(); ++it) {
-						if ( (blockMetadata.lastAccessNode == it->lastAccessNode) && 
+						if ( (blockMetadata.creatorNode == it->creatorNode) && 
 							 (blockMetadata.blockSize == it->blockSize) && 
 							 (blockMetadata.addr == it->addr)
 							) {
