@@ -38,10 +38,10 @@ int main(int argc, char** argv) {
         
         lapsed.tv_sec = second.tv_sec - first.tv_sec;
         
-        if (lapsed.tv_sec > 1)
+        if (lapsed.tv_sec > 0)
         {
             gettimeofday (&first, &tzp);
-            gettimeofday (&second, &tzp);
+            //gettimeofday (&second, &tzp);
             if (first.tv_usec > second.tv_usec) {
                 second.tv_usec += 1000000;
                 second.tv_sec--;
