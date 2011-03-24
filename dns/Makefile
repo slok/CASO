@@ -7,10 +7,10 @@ INCLUDE=-I../util
 main: EchoTcpListener EchoTcpClient NameServer NameClient ProposalDnsClient.bin ProposalDnsServer.bin
 
 ProposalDnsServer.bin: ProposalDnsServerThread.o  ProposalDnsServer.o
-	$(CC) ProposalDnsServerThread.o ProposalDnsServer.o  $(LDFLAGS) -o ProposalDnsServer.bin
+	$(CC) ProposalDnsServerThread.o ProposalDnsServer.o  $(LDFLAGS) -lcasoaes -o ProposalDnsServer.bin
 
 ProposalDnsClient.bin: ProposalDnsClient.o
-	$(CC) ProposalDnsClient.o  $(LDFLAGS) -o ProposalDnsClient.bin
+	$(CC) ProposalDnsClient.o  $(LDFLAGS) -lcasoaes -o ProposalDnsClient.bin
 
 EchoTcpListener: EchoServerThread.o EchoTcpListener.o
 	$(CC) EchoServerThread.o EchoTcpListener.o $(LDFLAGS) -o EchoTcpListener

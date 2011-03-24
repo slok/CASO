@@ -1,6 +1,6 @@
 
 #include "ProposalDnsServerThread.h"
-#include "SQLiteMap.h" 
+
 
 namespace PracticaCaso
 {
@@ -12,9 +12,17 @@ namespace PracticaCaso
     {
         string msg = (this->client)->receive();
         char seps[] = " ";
-        string token; 
+        string token, user, pass; 
         PracticaCaso::SQLiteMap * SQLiteMap = new PracticaCaso::SQLiteMap("logins.db");
         int state = 0; //0 = not logged, 1 = login accepted(not the pass yet), 2 = logged, 3 = close 
+        
+        //neccesary variables for AES encryptation
+        uint32_t salt[] = {12345, 54321}; //to salt the AES. mmmmmmm... tasty :D
+        int len;
+        uint8_t *clientDecryptedPass;
+        uint8_t *dbDecryptedPass;
+        uint8_t *key = (uint8_t *)"01234567899876543210";
+        AESUtil aesCrypt(key, salt);
         
         while(state < 3)
         {
@@ -31,6 +39,7 @@ namespace PracticaCaso
                         //check if the user exists on the DB
                         if(SQLiteMap->get(token).size() > 0)
                         {    
+                            user = token;
                             state = 1;//now the client can enter the password
                             cout << "[USER  LOGIN OK]" << endl;
                             msg = "[USER OK]";
@@ -46,6 +55,20 @@ namespace PracticaCaso
                 case 1: //login accepted (not the pass yet)
                 {
                     cout << "[PASS  MESSAGE RECEIVED]" << endl;
+                    
+                    //decrypt the pass message
+                    len = msg.size();
+                    clientDecryptedPass = aesCrypt.decrypt((uint8_t *)msg.c_str(), &len);
+                    //decrypt the BD pass
+                    pass = SQLiteMap->get(user);
+                    len = pass.size();
+                    dbDecryptedPass = aesCrypt.decrypt((uint8_t *)pass.c_str(), &len);
+                    //compare both results
+                    if (strncmp((char *)clientDecryptedPass, (char *)dbDecryptedPass, pass.size()+1))
+                        cout << "[AUTENTICATION FAILED]" << endl;
+                    else
+                        cout << "[AUTENTICATION OK]" << endl;
+                    
                     msg = "[CLOSE]";
                     state = 3;
                     break;

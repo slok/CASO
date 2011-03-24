@@ -1,4 +1,5 @@
 #include "NameServer.h"
+#include "AESUtil.h"
 
 void usage() {
 	cout << "Usage: ProposalDnsClient.bin <server-port> <domain-name-to-resolve>" << endl;
@@ -11,11 +12,20 @@ int main(int argc, char** argv) {
 		usage();
 	}
 
-    //////////////NameServer Part/////////////////////
+    //general variables
 	PracticaCaso::TcpClient *client = new PracticaCaso::TcpClient();
 	string dnsName, ipAddressAndPort, user, pass, msg, ip;
     int port, tries = 3, state = 0; //0 = not logged, 1 = login accepted(not the pass yet), 2 = logged, 3 = close
     
+    //neccesary variables for AES encryptation
+    uint32_t salt[] = {12345, 54321}; //to salt the AES. mmmmmmm... tasty :D
+    uint8_t *auxPass = NULL;
+    int len;
+    uint8_t *cipherPass;
+    uint8_t *key = (uint8_t *)"01234567899876543210";
+    AESUtil aesCrypt(key, salt);
+    
+    //////////////NameServer Part/////////////////////
     client->connect("127.0.0.1", atoi(argv[1])); //connect with the name server
 	
     // Lookup in NameServer(send the domain that we want)
@@ -60,8 +70,13 @@ int main(int argc, char** argv) {
                         tries = 3;
                         cout << "Insert your password: ";
                         cin >> pass;
-                        msg = pass; //this has to be encrypted
                         
+                        //encrypt the message
+                        len = pass.size();
+                        auxPass = (uint8_t *)pass.c_str();
+                        cipherPass = aesCrypt.encrypt(auxPass, &len);
+                        //cast unsigned char to char and the to string :s, double casting yai!
+                        msg = (string)(char *)cipherPass;
                         //go to the 2 state, there we will check the password  accepted response
                         state = 2;
                         

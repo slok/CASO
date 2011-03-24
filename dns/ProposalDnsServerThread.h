@@ -5,6 +5,8 @@
 
 #include "Thread.h"
 #include "TcpListener.h"
+#include "AESUtil.h"
+#include "SQLiteMap.h" 
 
 namespace PracticaCaso
 {
