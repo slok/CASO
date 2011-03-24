@@ -52,5 +52,6 @@ DsmTimeClient.o: DsmTimeClient.c
 
 clean:
 	rm *.o
-	rm *.dll
+	#rm *.dll
 	rm DsmServer DsmTest MatrixEvenAdder MatrixOddAdder libesidedsm.so 
+	rm *.bin

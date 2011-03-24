@@ -4,7 +4,13 @@ CC=g++
 LDFLAGS=-L../util -lm -lpthread -lesidesocket -lesidethread -lesidesqlite
 INCLUDE=-I../util
 
-main: EchoTcpListener EchoTcpClient NameServer NameClient
+main: EchoTcpListener EchoTcpClient NameServer NameClient ProposalDnsClient.bin ProposalDnsServer.bin
+
+ProposalDnsServer.bin: ProposalDnsServerThread.o  ProposalDnsServer.o
+	$(CC) ProposalDnsServerThread.o ProposalDnsServer.o  $(LDFLAGS) -o ProposalDnsServer.bin
+
+ProposalDnsClient.bin: ProposalDnsClient.o
+	$(CC) ProposalDnsClient.o  $(LDFLAGS) -o ProposalDnsClient.bin
 
 EchoTcpListener: EchoServerThread.o EchoTcpListener.o
 	$(CC) EchoServerThread.o EchoTcpListener.o $(LDFLAGS) -o EchoTcpListener
@@ -18,6 +24,15 @@ NameServer: NameServer.o
 NameClient: NameClient.o
 	$(CC) NameClient.o $(LDFLAGS) -o NameClient
 
+ProposalDnsServerThread.o: ProposalDnsServerThread.cpp  ProposalDnsServerThread.h
+	$(CC) $(INCLUDE) -c ProposalDnsServerThread.cpp
+
+ProposalDnsServer.o: ProposalDnsServer.cpp 
+	$(CC) $(INCLUDE) -c ProposalDnsServer.cpp
+
+ProposalDnsClient.o: ProposalDnsClient.cpp 
+	$(CC) $(INCLUDE) -c ProposalDnsClient.cpp
+	
 EchoServerThread.o: EchoServerThread.cc EchoServerThread.h
 	$(CC) $(INCLUDE) -c EchoServerThread.cc
 
@@ -37,3 +52,4 @@ clean:
 	rm *.o
 	rm EchoTcpListener EchoTcpClient NameServer NameClient
 	rm *.exe
+	rm *.bin

@@ -55,4 +55,5 @@ clean:
 	rm *.o
 	rm *.so
 	rm *.dll
+	rm *.bin
 
