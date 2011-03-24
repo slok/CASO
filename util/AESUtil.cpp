@@ -1,21 +1,3 @@
-/*
-Copyright (C) 2011 Iraide Diaz (Sharem)
-Copyright (C) 2011 Xabier Larrakoetxea (slok)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #include "AESUtil.h"
 
 AESUtil::AESUtil()
@@ -68,6 +50,7 @@ AESUtil::AESUtil(uint8_t* kd, uint32_t* s)
 uint8_t *AESUtil::encrypt(uint8_t *plainText, int *len)
 {
     /* max ciphertext len for a n bytes of plaintext is n + AES_BLOCK_SIZE -1 bytes */
+    *len = *len +1;
     int c_len = *len + AES_BLOCK_SIZE, f_len = 0;
 
     uint8_t *cipherText = new uint8_t[c_len];

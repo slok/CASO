@@ -5,8 +5,15 @@ CC=g++ -fPIC
 
 LDFLAGS=-shared -lm -lpthread 
 
-main: libesidesocket.so libesidethread.so libesidesh.so  libesidesqlite.so libcasoaes.so 
+
+main: libesidesocket.so libesidethread.so libesidesh.so  libesidesqlite.so libcasoaes.so insertPasswordDB.bin getPasswordsDB.bin
 #SQLiteMap.bin
+
+getPasswordsDB.bin: getPasswordsDB.cpp
+	g++ -L./ -lesidesqlite -lcasoaes getPasswordsDB.cpp -o getPasswordsDB.bin
+
+insertPasswordDB.bin: insertPasswordDB.cpp
+	g++ -L./ -lesidesqlite -lcasoaes insertPasswordDB.cpp -o insertPasswordDB.bin
 
 libesidesocket.so: TcpListener.o
 	$(CC) $(LDFLAGS) TcpListener.o -o libesidesocket.so
