@@ -90,9 +90,15 @@ namespace PracticaCaso
                 case 2: //logged
                 {
                     cout << "[SOMETHING  MESSAGE RECEIVED]" << endl;
-                    //msg = "[CLOSE]";
-                    msg = "<echo> "+ msg +" </echo>";
-                    //state = 3;
+                    
+                    //if the user wants to quit we have to go to state 3, if not, do a normal echo
+                    if(msg.find("QUIT") == 0) 
+                    { 
+                        msg = "[CLOSE]";
+                        state = 3;
+                    }
+                    else
+                        msg = "<echo> "+ msg +" </echo>";
                     break;
                 }
             }
