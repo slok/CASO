@@ -30,9 +30,9 @@ namespace PracticaCaso
             {
                 case 0: //not logged
                 {
+                    cout << "[USER  MESSAGE RECEIVED]" << endl;
                     if(msg.find("USER") == 0) 
                     {
-                        cout << "[USER  MESSAGE RECEIVED]" << endl;
                         token = strtok((char *)msg.c_str(), seps);
                         token = strtok(NULL, seps); //get the second part after " "(blank)
                         
@@ -50,34 +50,49 @@ namespace PracticaCaso
                             msg =  "[USER ERROR]";
                         }
                     }
+                    else
+                        msg =  "[COMMAND ERROR]";
                     break;
                 }
                 case 1: //login accepted (not the pass yet)
                 {
                     cout << "[PASS  MESSAGE RECEIVED]" << endl;
+                   
+                    token = strtok((char *)msg.c_str(), seps);
+                    msg = strtok(NULL, seps); //get the second part after " "(blank) 
                     
                     //decrypt the pass message
                     len = msg.size();
                     clientDecryptedPass = aesCrypt.decrypt((uint8_t *)msg.c_str(), &len);
+                    
                     //decrypt the BD pass
                     pass = SQLiteMap->get(user);
                     len = pass.size();
                     dbDecryptedPass = aesCrypt.decrypt((uint8_t *)pass.c_str(), &len);
+                    
                     //compare both results
                     if (strncmp((char *)clientDecryptedPass, (char *)dbDecryptedPass, pass.size()+1))
+                    {
                         cout << "[AUTENTICATION FAILED]" << endl;
+                        msg = "[PASS ERROR]";
+                        //msg = "[CLOSE]";
+                        //state = 3;
+                    }
                     else
+                    {
                         cout << "[AUTENTICATION OK]" << endl;
+                        msg = "[PASS OK]";
+                        state = 2;
+                    }
                     
-                    msg = "[CLOSE]";
-                    state = 3;
                     break;
                 }
                 case 2: //logged
                 {
                     cout << "[SOMETHING  MESSAGE RECEIVED]" << endl;
-                    msg = "[CLOSE]";
-                    state = 3;
+                    //msg = "[CLOSE]";
+                    msg = "<echo> "+ msg +" </echo>";
+                    //state = 3;
                     break;
                 }
             }
