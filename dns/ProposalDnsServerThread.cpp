@@ -37,8 +37,11 @@ namespace PracticaCaso
         int len;
         uint8_t *clientDecryptedPass;
         uint8_t *dbDecryptedPass;
-        uint8_t *key = (uint8_t *)"01234567899876543210";
-        AESUtil aesCrypt(key, salt);
+        uint8_t *encryptedMsg, *decryptedMsg;
+        uint8_t *keyClient = (uint8_t *)"0123456789ABCDEF0123"; //The decrypt key in the client and the DB stored passwords, are different, by this way is "impossible to compare both"
+        uint8_t *keyDB = (uint8_t *)"01234567899876543210";
+        AESUtil aesCryptDB(keyDB, salt);
+        AESUtil aesCryptClient(keyClient, salt);
         
         //check if the first command of the user is quit(if not, this will be checked every loop)
         if(commandVec[0].find("quit") == 0) 
@@ -90,15 +93,15 @@ namespace PracticaCaso
                        
                         //decrypt the pass message
                         len = commandVec[1].size();
-                        clientDecryptedPass = aesCrypt.decrypt((uint8_t *)commandVec[1].c_str(), &len);
+                        clientDecryptedPass = aesCryptClient.decrypt((uint8_t *)commandVec[1].c_str(), &len);
                         
                         //decrypt the BD pass
                         pass = SQLiteMap->get(user);
                         len = pass.size();
-                        dbDecryptedPass = aesCrypt.decrypt((uint8_t *)pass.c_str(), &len);
+                        dbDecryptedPass = aesCryptDB.decrypt((uint8_t *)pass.c_str(), &len);
                         
                         //compare both results
-                        if (strncmp((char *)clientDecryptedPass, (char *)dbDecryptedPass, pass.size()+1))
+                        if (strncmp((char *)clientDecryptedPass, (char *)dbDecryptedPass, pass.size()+1) != 0)
                         {
                             tries--;
                             cout << "[AUTENTICATION FAILED]" << endl;
@@ -160,6 +163,40 @@ namespace PracticaCaso
                             intStrAux.str("");
                             intStrAux << commandVec[1] << " / " << commandVec[2] << " = " << aux;
                             msg = ""+ intStrAux.str();
+                        }else if(commandVec[0].find("encrypt") == 0)
+                        {
+                            //create again the original message
+                            string origStr = commandVec[2];
+                            for(int i=3; i < commandVec.size(); i++) //the first is the command, seccond the key and third is added in the previous line to start the string
+                            {
+                                origStr = origStr + " " + commandVec[i];
+                            }   
+                            
+                            //encrypt the message
+                            AESUtil aesCryptMsg((uint8_t *)commandVec[1].c_str(), salt);
+                            len = origStr.size();
+                            encryptedMsg = aesCryptMsg.encrypt((uint8_t *)origStr.c_str(), &len);
+                            
+                            //check if is encrypted ok
+                            len = ((string)(char *)encryptedMsg).size();
+                            decryptedMsg = aesCryptMsg.decrypt(encryptedMsg, &len);
+                            
+                            //compare both results
+                            len = ((string)(char *)decryptedMsg).size();
+                            if(strncmp((char *)origStr.c_str(), (char *)decryptedMsg, len+1) == 0)
+                            {
+                                 //create the message
+                                msg = "[Original message: " + origStr + " ]\n";
+                                msg = msg + "[Encryptation key: " + commandVec[1] + " ]\n";
+                                msg =  msg + "[Encrypted message(AES): " + (char *)encryptedMsg + " ]";
+                                cout << "[ENCRYPTATION OK]";
+                            }
+                            else
+                            {
+                                cout << "[ENCRYPTATION FAILED]";
+                                msg = "[ENCRYPTATION ERROR]";
+                            }
+                           
                         }
                     }
                     else

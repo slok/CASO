@@ -6,6 +6,25 @@ void usage() {
 	exit(1);
 }
 
+void helpCommands()
+{
+    cout << "######################" << endl;
+    cout << "use: command [args]" << endl;
+    cout << "commands:" << endl;
+    cout << endl;
+    cout << "   help" << endl;
+    cout << "   user <username>" << endl;
+    cout << "   pass <password>" << endl;
+    cout << "   echo <anything>" << endl;
+    cout << "   sum <op1> <op2>" << endl;
+    cout << "   rest <op1> <op2>" << endl;
+    cout << "   multiply <op1> <op2>" << endl;
+    cout << "   divide <op1> <op2>" << endl;
+    cout << "   encrypt <key> <anything>" << endl;
+    cout << "   quit" << endl;
+    cout << "######################" << endl;
+}
+
 vector<string> extractCommandAndArgs(string message)
 {
     char seps[] = " ";
@@ -30,7 +49,7 @@ string encryptMsg(string textDec)
     uint8_t *auxPass = NULL;
     int len;
     uint8_t *cipherPass;
-    uint8_t *key = (uint8_t *)"01234567899876543210";
+    uint8_t *key = (uint8_t *)"0123456789ABCDEF0123";
     AESUtil aesCrypt(key, salt);
     string msg;
     vector<string> commandVec;
@@ -39,7 +58,7 @@ string encryptMsg(string textDec)
     len = textDec.size();
     auxPass = (uint8_t *)textDec.c_str();
     cipherPass = aesCrypt.encrypt(auxPass, &len);
-    //cast unsigned char to char and the to string :s, double casting yai!
+    //cast unsigned char to char and then to string :s, double casting yai!
     msg = (string)(char *)cipherPass;
     return msg;
 
@@ -101,21 +120,7 @@ int main(int argc, char** argv) {
                     badCommand = false;
                 else if(commandVec[0].find("help") == 0) //prompt help
                 {
-                    cout << "######################" << endl;
-                    cout << "use: command [args]" << endl;
-                    cout << "commands:" << endl;
-                    cout << endl;
-                    cout << "   help" << endl;
-                    cout << "   user <username>" << endl;
-                    cout << "   pass <password>" << endl;
-                    cout << "   echo <anything>" << endl;
-                    cout << "   sum <op1> <op2>" << endl;
-                    cout << "   rest <op1> <op2>" << endl;
-                    cout << "   multiply <op1> <op2>" << endl;
-                    cout << "   divide <op1> <op2>" << endl;
-                    cout << "   quit" << endl;
-                    cout << "######################" << endl;
-                    
+                    helpCommands();
                 }
             }
             
