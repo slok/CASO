@@ -50,7 +50,6 @@ namespace PracticaCaso
         
         while(state < 3)
         {
-            cout << commandVec.size() << endl;
             switch(state)
             {
                 case 0: //not logged
@@ -122,10 +121,46 @@ namespace PracticaCaso
                 }
                 case 2: //logged
                 {
+                    cout << "[COMMAND MESSAGE RECEIVED]" << endl;
+                    
                     if(commandVec[0].find("echo") == 0) 
                     {
                         cout << "[SOMETHING  MESSAGE RECEIVED]" << endl;
-                        msg = "<echo> "+ msg +" </echo>";
+                        msg = "<echo>";
+                        for (int i=1; i < commandVec.size(); i++)
+                        {
+                            msg = msg + " " + commandVec[i];
+                        }   
+                        msg +=" </echo>";
+                    }else 
+                    if(commandVec.size() == 3) //if isn't echo or the commands  don't have 2 parameters the command error(for now...)
+                    {
+                        if(commandVec[0].find("sum") == 0)
+                        {
+                            int aux = atoi(commandVec[1].c_str()) + atoi(commandVec[2].c_str());
+                            intStrAux.str("");
+                            intStrAux << commandVec[1] << " + " << commandVec[2] << " = " << aux;
+                            msg = ""+ intStrAux.str();
+                            
+                        }else if(commandVec[0].find("rest") == 0)
+                        {
+                            int aux = atoi(commandVec[1].c_str()) - atoi(commandVec[2].c_str());
+                            intStrAux.str("");
+                            intStrAux << commandVec[1] << " - " << commandVec[2] << " = " << aux;
+                            msg = ""+ intStrAux.str();
+                        }else if(commandVec[0].find("multiply") == 0)
+                        {
+                            int aux = atoi(commandVec[1].c_str()) * atoi(commandVec[2].c_str());
+                            intStrAux.str("");
+                            intStrAux << commandVec[1] << " x " << commandVec[2] << " = " << aux;
+                            msg = ""+ intStrAux.str();
+                        }else if(commandVec[0].find("divide") == 0)
+                        {
+                            int aux = atoi(commandVec[1].c_str()) / atoi(commandVec[2].c_str());
+                            intStrAux.str("");
+                            intStrAux << commandVec[1] << " / " << commandVec[2] << " = " << aux;
+                            msg = ""+ intStrAux.str();
+                        }
                     }
                     else
                         msg =  "[COMMAND ERROR]";

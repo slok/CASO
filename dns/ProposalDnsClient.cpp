@@ -76,9 +76,9 @@ int main(int argc, char** argv) {
     port = atoi((ipAddressAndPort.substr(ipAddressAndPort.find(":")+1)).c_str());
     client->connect(ip,port);
     
-	if (ipAddressAndPort.find("ERROR") == 0) {
-		cout << "The DNS name " << dnsName << " could not be resolved." << endl;
-	} 
+    if (ipAddressAndPort.find("ERROR") == 0) {
+        cout << "The DNS name " << dnsName << " could not be resolved." << endl;
+    } 
     else 
     {//////////////////Server Part/////////////////////
         while(!exit)
@@ -102,13 +102,18 @@ int main(int argc, char** argv) {
                 else if(commandVec[0].find("help") == 0) //prompt help
                 {
                     cout << "######################" << endl;
-                    cout << "use: command <arg>" << endl;
+                    cout << "use: command [args]" << endl;
                     cout << "commands:" << endl;
-                    cout << "     *help" << endl;
-                    cout << "     *user <username>:" << endl;
-                    cout << "     *pass <password>:" << endl;
-                    cout << "     *echo <anything>:" << endl;
-                    cout << "     *quit" << endl;
+                    cout << endl;
+                    cout << "   help" << endl;
+                    cout << "   user <username>" << endl;
+                    cout << "   pass <password>" << endl;
+                    cout << "   echo <anything>" << endl;
+                    cout << "   sum <op1> <op2>" << endl;
+                    cout << "   rest <op1> <op2>" << endl;
+                    cout << "   multiply <op1> <op2>" << endl;
+                    cout << "   divide <op1> <op2>" << endl;
+                    cout << "   quit" << endl;
                     cout << "######################" << endl;
                     
                 }
@@ -132,9 +137,10 @@ int main(int argc, char** argv) {
             if(msg.find("[QUIT]") == 0)
                 exit = true;
         }
+        //finish
+        client->close();
 	}
-    //finish
-    client->close();
+    
     delete client;
     
 }
