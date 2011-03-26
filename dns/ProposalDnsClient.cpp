@@ -6,6 +6,23 @@ void usage() {
 	exit(1);
 }
 
+vector<string> extractCommandAndArgs(string message)
+{
+    char seps[] = " ";
+    vector<string> vec;
+    char *token;
+    
+    token = strtok((char *)message.c_str(), seps);
+        
+    while (token != NULL) 
+    {
+        vec.push_back((string)token); 
+        token = strtok(NULL, seps);        
+    } 
+    return vec;
+}
+
+
 string encryptMsg(string textDec)
 {
     //neccesary variables for AES encryptation
@@ -16,6 +33,7 @@ string encryptMsg(string textDec)
     uint8_t *key = (uint8_t *)"01234567899876543210";
     AESUtil aesCrypt(key, salt);
     string msg;
+    vector<string> commandVec;
     
     //encrypt the message
     len = textDec.size();
@@ -35,8 +53,10 @@ int main(int argc, char** argv) {
 
     //general variables
 	PracticaCaso::TcpClient *client = new PracticaCaso::TcpClient();
-	string dnsName, ipAddressAndPort, user, pass, msg, ip;
-    int port, tries = 3, state = 0; //0 = not logged, 1 = login accepted(not the pass yet), 2 = logged, 3 = close
+	string dnsName, ipAddressAndPort, msg, ip, aux;
+    int port, length;
+    vector<string> commandVec;
+    bool exit = false, badCommand = true;
     
    
     
@@ -61,103 +81,62 @@ int main(int argc, char** argv) {
 	} 
     else 
     {//////////////////Server Part/////////////////////
-        while((state < 3) && (tries > 0))//if 3 tries are used then close
+        while(!exit)
         { 
-            switch(state)
+            //reset bad command boolean
+            badCommand = true;
+            
+            while(badCommand) //if the command is bad then loop until is a good constructed command
             {
-                case 0:
+                //insert command
+                cout << "Insert your command: ";
+                getline(cin, msg);
+                
+                //copy the string to have the original msg intact, the strtoken brokens
+                strcpy((char *)aux.c_str(),(char *)msg.c_str());
+                //split command
+                commandVec = extractCommandAndArgs(aux);
+                
+                if ((commandVec.size() >= 2) || (commandVec[0].find("quit") == 0))
+                    badCommand = false;
+                else if(commandVec[0].find("help") == 0) //prompt help
                 {
-                    cout << "Insert your Username(Login): ";
-                    getline(cin, user);
-                    msg = "USER " + user;
+                    cout << "######################" << endl;
+                    cout << "use: command <arg>" << endl;
+                    cout << "commands:" << endl;
+                    cout << "     *help" << endl;
+                    cout << "     *user <username>:" << endl;
+                    cout << "     *pass <password>:" << endl;
+                    cout << "     *echo <anything>:" << endl;
+                    cout << "     *quit" << endl;
+                    cout << "######################" << endl;
                     
-                    //go to the 1 state, there we will check the user accepted response
-                    state = 1;
-                    
-                    break;
-                }
-                case 1:
-                {
-                    if(msg.find("[USER ERROR]") == 0)
-                    {
-                        cout << "[USER NOT ACCEPTED...]" << endl;
-                        cout << "[REMAINING TRIES: "<< tries-1 << " ]"<< endl;
-                        
-                        //go to the user state again and rest the used try
-                        state = 0; 
-                        tries--;
-                        
-                        
-                        
-                    }else //user accepted
-                    {
-                        //if is the first time in this state, we have to reset the tries, otherwise we come 
-                        //from the state 2, so we have not to reset the tries
-                        if(msg.find("[USER OK]") == 0)
-                        {
-                            cout << "[USER ACCEPTED]" << endl;
-                            //reset the tries
-                            tries = 3;
-                        }
-                        cout << "Insert your password: ";
-                        getline(cin, pass);
-                        //encrypt password 
-                        msg = encryptMsg(pass);
-                        msg = "PASS " + msg;
-                        //go to the 2 state, there we will check the password  accepted response and come again or not
-                        state = 2;
-                        
-                    }
-
-                    break;
-                }
-                case 2:
-                {
-                    if(msg.find("[PASS ERROR]") == 0)
-                    {
-                        cout << "[USER AND PASS NOTAUTENTICATED]" << endl;
-                        //reset the tries and go to pass state(not logged = 1)
-                        state = 1; 
-                        tries--;
-                        
-                    }
-                    else
-                    {
-                        //if is the first time after loogged in, reset tries and prompt message
-                        //if not, is the logged state.
-                        if(msg.find("[PASS ERROR]") == 0)
-                        {
-                            cout << "[USER AND PASS AUTENTICATED]" << endl;
-                            //reset the tries
-                            tries = 3;
-                        }
-                        //start logged mode with echo server
-                        cout << msg << endl;//echo the servers response
-                        cout << "Insert your word to echo by the server: ";
-                        getline(cin, msg);
-                        
-                    }
-                    break;
                 }
             }
+            
+            //if is the command then ecript
+            if (commandVec[0].find("pass") == 0)
+            {    
+                //encrypt password 
+                msg = encryptMsg(commandVec[1]);
+                msg = "pass " + msg;
+            }else if(commandVec[0].find("quit") == 0) //we want to quit, we send to the server and wait response to close connection
+                exit = true;
+             
             //send and wait response
             client->send(msg);
             msg = client->receive();
             
-            //if exit message then close
-            if(msg.find("[CLOSE]") == 0)
-            {
-                cout << "[CLOSE MESSAGE RECEIVED]" << endl;
-                state = 3;
-            }
+            cout << msg << endl;
+            
+            if(msg.find("[QUIT]") == 0)
+                exit = true;
         }
 	}
+    //finish
+    client->close();
+    delete client;
     
-    if(state == 3)
-    {
-        client->close();
-        delete client;
-    }
 }
 
 

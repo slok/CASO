@@ -7,6 +7,7 @@
 #include "TcpListener.h"
 #include "AESUtil.h"
 #include "SQLiteMap.h" 
+#include <sstream> 
 
 namespace PracticaCaso
 {
@@ -14,6 +15,7 @@ namespace PracticaCaso
 		private:
 			TcpClient* client;
 			void run();
+            vector<string> extractCommandAndArgs(string message);
 		public:
 			ProposalDnsServerThread(TcpClient* c): client(c) {}
 			~ProposalDnsServerThread();

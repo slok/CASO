@@ -7,14 +7,30 @@ namespace PracticaCaso
     ProposalDnsServerThread::~ProposalDnsServerThread() {
         delete this->client;
     }
-
+    vector<string> ProposalDnsServerThread::extractCommandAndArgs(string message)
+    {
+        char seps[] = " ";
+        vector<string> vec;
+        char *token;
+        
+        token = strtok((char *)message.c_str(), seps);
+            
+        while (token != NULL) 
+        {
+            vec.push_back((string)token); 
+            token = strtok(NULL, seps);        
+        }
+        return vec;
+    }
     void ProposalDnsServerThread::run() 
     {
         string msg = (this->client)->receive();
-        char seps[] = " ";
-        string token, user, pass; 
+        vector<string> commandVec = extractCommandAndArgs(msg);// in the vector we will store the commands and arguments
+        string user, pass; 
         PracticaCaso::SQLiteMap * SQLiteMap = new PracticaCaso::SQLiteMap("logins.db");
-        int state = 0; //0 = not logged, 1 = login accepted(not the pass yet), 2 = logged, 3 = close 
+        int tries = 3, state = 0; //0 = not logged, 1 = login accepted(not the pass yet), 2 = logged, 3 = close 
+        stringstream intStrAux;
+        
         
         //neccesary variables for AES encryptation
         uint32_t salt[] = {12345, 54321}; //to salt the AES. mmmmmmm... tasty :D
@@ -24,30 +40,43 @@ namespace PracticaCaso
         uint8_t *key = (uint8_t *)"01234567899876543210";
         AESUtil aesCrypt(key, salt);
         
+        //check if the first command of the user is quit(if not, this will be checked every loop)
+        if(commandVec[0].find("quit") == 0) 
+        { 
+            //user wants to quit, so we close connection and send confirmation message to the client
+            state = 3;
+            (this->client)->send("[QUIT]");
+        }
+        
         while(state < 3)
         {
+            cout << commandVec.size() << endl;
             switch(state)
             {
                 case 0: //not logged
                 {
-                    cout << "[USER  MESSAGE RECEIVED]" << endl;
-                    if(msg.find("USER") == 0) 
+                    if(commandVec[0].find("user") == 0) 
                     {
-                        token = strtok((char *)msg.c_str(), seps);
-                        token = strtok(NULL, seps); //get the second part after " "(blank)
-                        
+                        cout << "[USER MESSAGE RECEIVED]" << endl;
+                    
                         //check if the user exists on the DB
-                        if(SQLiteMap->get(token).size() > 0)
+                        if(SQLiteMap->get(commandVec[1]).size() > 0)
                         {    
-                            user = token;
+                            user = commandVec[1];
                             state = 1;//now the client can enter the password
+                            tries = 3;//reset the tries for the password
                             cout << "[USER  LOGIN OK]" << endl;
                             msg = "[USER OK]";
                         }
                         else
                         {
+                            //rest one try;
+                            tries --;
                             cout << "[USER  LOGIN ERROR]" << endl;
-                            msg =  "[USER ERROR]";
+                            //clear the stringstream and use to convert integer to string
+                            intStrAux.str("");
+                            intStrAux << tries;
+                            msg =  "[USER ERROR] tries remaining: " + intStrAux.str();
                         }
                     }
                     else
@@ -56,58 +85,79 @@ namespace PracticaCaso
                 }
                 case 1: //login accepted (not the pass yet)
                 {
-                    cout << "[PASS  MESSAGE RECEIVED]" << endl;
-                   
-                    token = strtok((char *)msg.c_str(), seps);
-                    msg = strtok(NULL, seps); //get the second part after " "(blank) 
-                    
-                    //decrypt the pass message
-                    len = msg.size();
-                    clientDecryptedPass = aesCrypt.decrypt((uint8_t *)msg.c_str(), &len);
-                    
-                    //decrypt the BD pass
-                    pass = SQLiteMap->get(user);
-                    len = pass.size();
-                    dbDecryptedPass = aesCrypt.decrypt((uint8_t *)pass.c_str(), &len);
-                    
-                    //compare both results
-                    if (strncmp((char *)clientDecryptedPass, (char *)dbDecryptedPass, pass.size()+1))
+                    if(commandVec[0].find("pass") == 0) 
                     {
-                        cout << "[AUTENTICATION FAILED]" << endl;
-                        msg = "[PASS ERROR]";
-                        //msg = "[CLOSE]";
-                        //state = 3;
+                        cout << "[PASS  MESSAGE RECEIVED]" << endl;
+                       
+                        //decrypt the pass message
+                        len = commandVec[1].size();
+                        clientDecryptedPass = aesCrypt.decrypt((uint8_t *)commandVec[1].c_str(), &len);
+                        
+                        //decrypt the BD pass
+                        pass = SQLiteMap->get(user);
+                        len = pass.size();
+                        dbDecryptedPass = aesCrypt.decrypt((uint8_t *)pass.c_str(), &len);
+                        
+                        //compare both results
+                        if (strncmp((char *)clientDecryptedPass, (char *)dbDecryptedPass, pass.size()+1))
+                        {
+                            tries--;
+                            cout << "[AUTENTICATION FAILED]" << endl;
+                            //clear the stringstream and use to convert integer to string
+                            intStrAux.str("");
+                            intStrAux << tries;
+                            msg = "[PASS ERROR] tries remaining: "+ intStrAux.str();
+                        }
+                        else
+                        {
+                            cout << "[AUTENTICATION OK]" << endl;
+                            msg = "[PASS OK]";
+                            state = 2;
+                            tries = 3;
+                        }
                     }
                     else
-                    {
-                        cout << "[AUTENTICATION OK]" << endl;
-                        msg = "[PASS OK]";
-                        state = 2;
-                    }
-                    
+                        msg =  "[COMMAND ERROR]";
                     break;
                 }
                 case 2: //logged
                 {
-                    cout << "[SOMETHING  MESSAGE RECEIVED]" << endl;
-                    
-                    //if the user wants to quit we have to go to state 3, if not, do a normal echo
-                    if(msg.find("QUIT") == 0) 
-                    { 
-                        msg = "[CLOSE]";
-                        state = 3;
+                    if(commandVec[0].find("echo") == 0) 
+                    {
+                        cout << "[SOMETHING  MESSAGE RECEIVED]" << endl;
+                        msg = "<echo> "+ msg +" </echo>";
                     }
                     else
-                        msg = "<echo> "+ msg +" </echo>";
+                        msg =  "[COMMAND ERROR]";
                     break;
                 }
             }
+            
+            //check the tries(3) if are 0 then close
+            if(tries <= 0)
+            {
+                msg = "[QUIT][3 TRIES USED]";
+                state = 3;
+            }
+            
             //send message and wait for response
             (this->client)->send(msg);
+            
             //if we changed the state to exit/close, we don't have to wait for a response
             if(state != 3)
+            {
                 msg = (this->client)->receive();
-
+                //get command of the message
+                commandVec = extractCommandAndArgs(msg);
+                
+                if(commandVec[0].find("quit") == 0) 
+                { 
+                    //user wants to quit, so we close connection and send confirmation message to the client
+                    state = 3;
+                    (this->client)->send("[QUIT]");
+                    
+                }
+            }
         }
         if (state == 3) // close connection
         {
