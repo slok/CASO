@@ -141,6 +141,22 @@ int main(int argc, char** argv) {
             
             if(msg.find("[QUIT]") == 0)
                 exit = true;
+            else if((msg.find("[USER OK]") == 0)) //automate password asking
+            {
+                msg = "[PASS ERROR]"; //reset the msg to enter the while loop
+                
+                while( (msg.find("[PASS ERROR]") == 0) && (msg.find("[QUIT]") != 0) )
+                {
+                    //insert command
+                    cout << "Insert your password: ";
+                    getline(cin, msg);
+                    msg = encryptMsg(msg);
+                    msg = "pass " + msg;
+                    client->send(msg);
+                    msg = client->receive();
+                    cout << msg << endl;
+                }
+            }
         }
         //finish
         client->close();
