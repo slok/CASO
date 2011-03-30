@@ -6,7 +6,7 @@ CC=g++ -fPIC
 LDFLAGS=-shared -lm -lpthread 
 
 
-main: libesidesocket.so libesidethread.so libesidesh.so  libesidesqlite.so libcasoaes.so insertPasswordDB.bin getPasswordsDB.bin
+main: libesidesocket.so libesidethread.so libesidesh.so  libesidesqlite.so libcasoaes.so libcasotictactoe.so insertPasswordDB.bin getPasswordsDB.bin
 #SQLiteMap.bin
 
 getPasswordsDB.bin: getPasswordsDB.cpp
@@ -26,10 +26,16 @@ libesidesh.so: MySh.o popen.o
 
 libcasoaes.so  :  AESUtil.o
 	$(CC) $(LDFLAGS) AESUtil.o -lcrypto -o  libcasoaes.so
+	
+libcasotictactoe.so : ticTacToeUtil.o
+	$(CC) $(LDFLAGS) ticTacToeUtil.o -o  libcasotictactoe.so
+
+ticTacToeUtil.o: ticTacToeUtil.cpp ticTacToeUtil.h colors.h
+	$(CC) -c ticTacToeUtil.cpp
 
 AESUtil.o: AESUtil.cpp AESUtil.h types.h
 	$(CC) -c AESUtil.cpp
-
+	
 libesidesqlite.so :  SQLiteMap.o
 	$(CC) $(LDFLAGS) SQLiteMap.o -lsqlite3 -ldl -o  libesidesqlite.so
 
@@ -54,6 +60,6 @@ popen.o: popen.cc popen.h
 clean:
 	rm *.o
 	rm *.so
-	rm *.dll
 	rm *.bin
+	rm *.dll
 
