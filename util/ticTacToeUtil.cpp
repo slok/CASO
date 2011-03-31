@@ -1,7 +1,7 @@
 
 #include "ticTacToeUtil.h"
 
-void initializeBoard(int board[3][3])
+void initializeBoard(int board[][3])
 {
     for(int i=0; i < 3; i++)
     {
@@ -12,7 +12,7 @@ void initializeBoard(int board[3][3])
     }
 }
 
-void drawMatrix(int board[3][3])
+void drawMatrix(int board[][3])
 {
     /* aspect:
         -------------------
@@ -41,7 +41,7 @@ void drawMatrix(int board[3][3])
     std::cout << "-------------------" << std::endl;
 }
 
-bool checkBoardComplete(int board[3][3])
+bool checkBoardComplete(int board[][3])
 {
     bool complete = false;
     
@@ -61,7 +61,7 @@ bool checkBoardComplete(int board[3][3])
     return complete;
 }
 
-int checkBoardState(int board[3][3])
+int checkBoardState(int board[][3])
 {
     int win;
     
@@ -86,10 +86,39 @@ int checkBoardState(int board[3][3])
 
 }
 
+void convert1DTo2D(int *orig, int out[][3])
+{
+
+    int x = 0;
+
+    for(int i=0; i<3; i++)
+    {
+        for(int j=0; j<3; j++)
+        {
+            out[j][i] = orig[x];
+            x+=1;
+        }
+    }
+}
+
+void convert2DTo1D(int orig[][3], int *out)
+{
+    int x = 0;
+
+    for(int i=0; i<3; i++)
+    {
+        for(int j=0; j<3; j++)
+        {
+            out[x] = orig[j][i];
+            x+=1;
+        }
+    }
+}
+
 /*int main()
 {
 
-    int board[3][3];
+    int board[][3];
     int win;
     initializeBoard(board);
     board[0][0] = CROSS;

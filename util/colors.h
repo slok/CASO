@@ -1,3 +1,5 @@
+#ifndef _COLORS_H
+#define _COLORS_H
 
 #define COL_RESET "\x1b[0m"
 // Foreground colors are in form of 3x
@@ -32,3 +34,5 @@
 #define WHITE_BK_RED_FG     "\x1b[47;31m"
 #define BLUE_BK_WHITE_FG    "\x1b[44;37m"
 #define GREEN_BK_YELLOW_FG  "\x1b[42;33m"
+
+#endif
