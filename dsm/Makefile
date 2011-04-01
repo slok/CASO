@@ -57,10 +57,10 @@ DsmTimeClient.o: DsmTimeClient.c
 	$(CC) $(INCLUDE) -c DsmTimeClient.c
 
 ProposalDsmReferee.o: ProposalDsmReferee.cpp
-	$(CC) $(INCLUDE) -c ProposalDsmReferee.cpp
+	$(CC) $(INCLUDE) -I./ -c ProposalDsmReferee.cpp
 
 ProposalDsmClient.o: ProposalDsmClient.cpp
-	$(CC) $(INCLUDE) -c ProposalDsmClient.cpp
+	$(CC) $(INCLUDE) -I./ -c ProposalDsmClient.cpp
 
 clean:
 	rm *.o

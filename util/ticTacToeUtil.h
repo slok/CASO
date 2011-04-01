@@ -3,16 +3,39 @@
 
 #include <iostream>
 #include "colors.h"
+#include "TcpListener.h"
+#include "Dsm.h"
 
 #define CROSS 1
 #define CIRCLE 0
 #define BLANK -1
+class TicTacToeUtil
+{
+    private:
+    int *board1D;
+    PracticaCaso::DsmDriver *driver;
+    int arraySize; //this is for the sizeof
+    
+    public:
+    int board2D[3][3]; //this is a bad thing, but we can't return multidimensional array
 
-void initializeBoard(int board[][3]);
-void drawMatrix(int board[][3]);
-bool checkBoardComplete(int board[][3]);
-int checkBoardState(int board[][3]);
-void convert1DTo2D(int *orig, int out[][3]);
-void convert2DTo1D(int orig[][3], int *out);
-
+    PracticaCaso::DsmDriver *getDriver();
+    int *getBoard1D();
+    //int **getboard2D();
+    TicTacToeUtil(string ip, int port, string dns);
+    void initializeBoard();
+    void drawMatrix();
+    void drawMatrix1D();
+    bool checkBoardComplete();
+    int checkBoardState();
+    void convert1DTo2D();
+    void convert2DTo1D();
+    void getBoardFromServer();
+    void setBoardToServer();
+    int getTurnFromServer();
+    void setTurnToServer(int turn);
+    int getWinFromServer();
+    void allocBoardInServer();
+    
+};
 #endif

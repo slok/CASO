@@ -20,10 +20,11 @@ int main(int argc, char** argv) {
 	}
 
 	// Hacer lookup dsm.deusto.es 
-    PracticaCaso::DsmDriver * driver = new PracticaCaso::DsmDriver("127.0.0.1", atoi(argv[1]), argv[2]);
+    // Hacer lookup dsm.deusto.es 
+    TicTacToeUtil ttt("127.0.0.1", atoi(argv[1]), argv[2]);
+    PracticaCaso::DsmDriver * driver = ttt.getDriver();
 	PracticaCaso::DsmData data;
-    int board2D[3][3];
-    int board1D[9];
+
     int numPlayers, next=1, win = -1; // -1 = not finished, 0 = nobody, 1 = player1, 2 = player2
     int turn; //0 = referee, 1 = player1, 2 = player2 
     
@@ -48,34 +49,7 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
     /////////////////////create board/////////////////////////////
-    cout << GREEN_BOLD << "[CREATING 3X3 TIC TAC TOE BOARD: " << driver->get_nid() << " ]"<< COL_RESET << endl;
-    try 
-    {
-		driver->dsm_malloc("board", sizeof(board1D));
-        //initialize
-        for(int i=0; i < 3; i++)
-        {
-            for(int j=0; j< 3; j++)
-            {
-                board2D[i][j] = BLANK;
-            }
-        }
-        //set in server
-        try {
-            //is need to transform, because the server stores only an array
-            convert2DTo1D(board2D, board1D);
-			driver->dsm_put("board", (void *)board1D, sizeof(board1D)); 
-		} catch (DsmException dsme) {
-			cerr << RED_BOLD << "ERROR: dsm_put(\"board\", board, " << sizeof(board1D) << ")): " << dsme << COL_RESET << endl;
-			driver->dsm_free("board");
-			exit(1);
-		}
-		
-	} catch (DsmException dsme) {
-		// There may be several processes doing a dsm_malloc, only the first one will succeed 
-		cerr << RED_BOLD << "[ERROR in dsm_malloc(\"Board\", sizeof(" << sizeof(board1D) << ")): " << dsme << " ]" << COL_RESET << endl;
-		exit(1);
-	}
+    ttt.allocBoardInServer();
 	
     ///////////////////create turn/////////////////////////////
      try 
@@ -116,11 +90,12 @@ int main(int argc, char** argv) {
 		cerr << RED_BOLD << "[ERROR in dsm_malloc(\"win\", sizeof(" << sizeof(win) << ")): " << dsme << " ]" << COL_RESET << endl;
 		exit(1);
 	}
-    
-    
+    ttt.getBoardFromServer();
+    ttt.drawMatrix();
     while(1)
     {
-        
+        ttt.getBoardFromServer();
+        ttt.drawMatrix();
     }
     
     

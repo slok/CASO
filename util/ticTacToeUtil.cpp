@@ -1,18 +1,41 @@
 
 #include "ticTacToeUtil.h"
 
-void initializeBoard(int board[][3])
+
+TicTacToeUtil::TicTacToeUtil(string ip, int port, string dns)
+{
+    this-> driver = new PracticaCaso::DsmDriver(ip, port, dns);
+    this->board1D = new int[9];
+    this->arraySize = 9;
+    this->initializeBoard();
+
+}
+PracticaCaso::DsmDriver *TicTacToeUtil::getDriver()
+{
+    return this->driver;
+}
+int *TicTacToeUtil::getBoard1D()
+{
+    return this->board1D;
+}
+
+/*int **TicTacToeUtil::getboard2D()
+{
+    return this->board2D;
+}*/
+
+void TicTacToeUtil::initializeBoard()
 {
     for(int i=0; i < 3; i++)
     {
         for(int j=0; j< 3; j++)
         {
-            board[i][j] = BLANK;
+            this->board2D[i][j] = BLANK;
         }
     }
 }
 
-void drawMatrix(int board[][3])
+void TicTacToeUtil::drawMatrix()
 {
     /* aspect:
         -------------------
@@ -29,7 +52,7 @@ void drawMatrix(int board[][3])
 
         for(int j=0; j< 3; j++)
         {
-            switch(board[j][i])
+            switch(this->board2D[j][i])
             {
                 case CROSS: std::cout << "|" << "  " << RED_BOLD << "X" << COL_RESET << "  "; break;
                 case CIRCLE: std::cout << "|" << "  " << BLUE_BOLD<< "O" << COL_RESET << "  "; break;
@@ -41,7 +64,16 @@ void drawMatrix(int board[][3])
     std::cout << "-------------------" << std::endl;
 }
 
-bool checkBoardComplete(int board[][3])
+void TicTacToeUtil::drawMatrix1D()
+{
+    for(int i=0;i < 9; i++)
+    {
+        cout << "["<<this->board1D[i] << "] ";
+    }
+    cout << endl;
+}
+
+bool TicTacToeUtil::checkBoardComplete()
 {
     bool complete = false;
     
@@ -50,7 +82,7 @@ bool checkBoardComplete(int board[][3])
     {
         for(int j=0; j< 3; j++)
         {
-            if(board[i][j] == BLANK)
+            if(this->board2D[i][j] == BLANK)
             {
                 complete = true;
                 break;
@@ -61,21 +93,21 @@ bool checkBoardComplete(int board[][3])
     return complete;
 }
 
-int checkBoardState(int board[][3])
+int TicTacToeUtil::checkBoardState()
 {
     int win;
     
-    if( (board[0][0] == CROSS && board[0][0] == board[0][1] && board[0][1] == board[0][2]) || (board[1][0] == CROSS && board[1][0] == board[1][1] && board[1][1] == board[1][2]) ||
-        (board[2][0] == CROSS && board[2][0] == board[2][1] && board[2][1] == board[2][2]) || (board[1][0] == CROSS && board[0][0] == board[1][0] && board[1][0] == board[2][0]) ||
-        (board[0][1] == CROSS && board[0][1] == board[1][1] && board[1][1] == board[2][1]) || (board[0][2] == CROSS && board[0][2] == board[1][2] && board[1][2] == board[2][2]) ||
-        (board[0][0] == CROSS && board[0][0] == board[1][1] && board[1][1] == board[2][2]) || (board[2][0] == CROSS && board[2][0] == board[1][1] && board[1][1] == board[0][2]))
+    if( (board2D[0][0] == CROSS && board2D[0][0] == board2D[0][1] && board2D[0][1] == board2D[0][2]) || (board2D[1][0] == CROSS && board2D[1][0] == board2D[1][1] && board2D[1][1] == board2D[1][2]) ||
+        (board2D[2][0] == CROSS && board2D[2][0] == board2D[2][1] && board2D[2][1] == board2D[2][2]) || (board2D[1][0] == CROSS && board2D[0][0] == board2D[1][0] && board2D[1][0] == board2D[2][0]) ||
+        (board2D[0][1] == CROSS && board2D[0][1] == board2D[1][1] && board2D[1][1] == board2D[2][1]) || (board2D[0][2] == CROSS && board2D[0][2] == board2D[1][2] && board2D[1][2] == board2D[2][2]) ||
+        (board2D[0][0] == CROSS && board2D[0][0] == board2D[1][1] && board2D[1][1] == board2D[2][2]) || (board2D[2][0] == CROSS && board2D[2][0] == board2D[1][1] && board2D[1][1] == board2D[0][2]))
     {
         win = CROSS;
     }else
-    if( (board[0][0] == CIRCLE && board[0][0] == board[0][1] && board[0][1] == board[0][2]) || (board[1][0] == CIRCLE && board[1][0] == board[1][1] && board[1][1] == board[1][2]) ||
-        (board[2][0] == CIRCLE && board[2][0] == board[2][1] && board[2][1] == board[2][2]) || (board[1][0] == CIRCLE && board[0][0] == board[1][0] && board[1][0] == board[2][0]) ||
-        (board[0][1] == CIRCLE && board[0][1] == board[1][1] && board[1][1] == board[2][1]) || (board[0][2] == CIRCLE && board[0][2] == board[1][2] && board[1][2] == board[2][2]) ||
-        (board[0][0] == CIRCLE && board[0][0] == board[1][1] && board[1][1] == board[2][2]) || (board[2][0] == CIRCLE && board[2][0] == board[1][1] && board[1][1] == board[0][2]))
+    if( (board2D[0][0] == CIRCLE && board2D[0][0] == board2D[0][1] && board2D[0][1] == board2D[0][2]) || (board2D[1][0] == CIRCLE && board2D[1][0] == board2D[1][1] && board2D[1][1] == board2D[1][2]) ||
+        (board2D[2][0] == CIRCLE && board2D[2][0] == board2D[2][1] && board2D[2][1] == board2D[2][2]) || (board2D[1][0] == CIRCLE && board2D[0][0] == board2D[1][0] && board2D[1][0] == board2D[2][0]) ||
+        (board2D[0][1] == CIRCLE && board2D[0][1] == board2D[1][1] && board2D[1][1] == board2D[2][1]) || (board2D[0][2] == CIRCLE && board2D[0][2] == board2D[1][2] && board2D[1][2] == board2D[2][2]) ||
+        (board2D[0][0] == CIRCLE && board2D[0][0] == board2D[1][1] && board2D[1][1] == board2D[2][2]) || (board2D[2][0] == CIRCLE && board2D[2][0] == board2D[1][1] && board2D[1][1] == board2D[0][2]))
     {
         win = CIRCLE;
     }
@@ -86,22 +118,7 @@ int checkBoardState(int board[][3])
 
 }
 
-void convert1DTo2D(int *orig, int out[][3])
-{
-
-    int x = 0;
-
-    for(int i=0; i<3; i++)
-    {
-        for(int j=0; j<3; j++)
-        {
-            out[j][i] = orig[x];
-            x+=1;
-        }
-    }
-}
-
-void convert2DTo1D(int orig[][3], int *out)
+void TicTacToeUtil::convert1DTo2D()
 {
     int x = 0;
 
@@ -109,12 +126,129 @@ void convert2DTo1D(int orig[][3], int *out)
     {
         for(int j=0; j<3; j++)
         {
-            out[x] = orig[j][i];
+            this->board2D[j][i] = this->board1D[x];
             x+=1;
         }
     }
 }
 
+void TicTacToeUtil::convert2DTo1D()
+{
+    int x = 0;
+
+    for(int i=0; i<3; i++)
+    {
+        for(int j=0; j<3; j++)
+        {
+            this->board1D[x] = this->board2D[j][i];
+            x+=1;
+        }
+    }
+
+}
+void TicTacToeUtil::getBoardFromServer()
+{
+    PracticaCaso::DsmData data;
+    //get the board
+    cout << GREEN_BOLD << "[GETTING 3X3 TIC TAC TOE BOARD: " << driver->get_nid() << " ]"<< COL_RESET << endl;
+    bool boardGet = false;
+    while (!boardGet) {
+        try {
+            data = this->driver->dsm_get("board");
+            this->board1D = ((int *)data.addr);
+            this->convert1DTo2D();
+            boardGet = true;
+        } catch (DsmException dsme) {
+            cerr << RED_BOLD << "ERROR in dsm_get(\"board\") - waiting for other process to initialize it: " << dsme << COL_RESET<< endl;
+            driver->dsm_wait("board");
+        }
+    }
+}
+
+void TicTacToeUtil::setBoardToServer()
+{
+    PracticaCaso::DsmData data;
+    try 
+    {
+        //is need to transform, because the server stores only an array
+        this->convert2DTo1D();
+        this->driver->dsm_put("board", (void *)this->board1D, sizeof(int)* this->arraySize); 
+    } catch (DsmException dsme) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"board\", board, " << sizeof(int)*this->arraySize << ")): " << dsme << COL_RESET << endl;
+        driver->dsm_free("board");
+        exit(1);
+    }
+}
+
+int TicTacToeUtil::getTurnFromServer()
+{
+    PracticaCaso::DsmData data;
+    int turn;
+    //get the board
+    cout << GREEN_BOLD << "[GETTING TURN: " << driver->get_nid() << " ]"<< COL_RESET << endl;
+    bool turnGet = false;
+    while (!turnGet) {
+        try {
+            data = this->driver->dsm_get("turn");
+            turn = *((int *)data.addr);
+            turnGet = true;
+        } catch (DsmException dsme) {
+            cout << RED_BOLD << "WAITING FOR TURN "<< COL_RESET<< endl;
+            driver->dsm_wait("turn");
+        }
+    }
+    return turn;
+}
+
+void TicTacToeUtil::setTurnToServer(int turn)
+{
+    //referee's turn
+    turn = 0;
+    try {
+        this->driver->dsm_put("turn", (void *)&turn, sizeof(turn)); 
+    } catch (DsmException dsme) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"turn\", turn, " << sizeof(turn) << ")): " << dsme << COL_RESET << endl;
+        driver->dsm_free("board");
+        exit(1);
+    }
+}
+
+int TicTacToeUtil::getWinFromServer()
+{
+    PracticaCaso::DsmData data;
+    int win;
+    //get the board
+    cout << GREEN_BOLD << "[GETTING TURN: " << driver->get_nid() << " ]"<< COL_RESET << endl;
+    bool winGet = false;
+    while (!winGet) {
+        try {
+            data = this->driver->dsm_get("win");
+            win = *((int *)data.addr);
+            winGet = true;
+        } catch (DsmException dsme) {
+            cout << RED_BOLD << "WAITING FOR WIN VARIABLE "<< COL_RESET<< endl;
+            driver->dsm_wait("win");
+        }
+    }
+    return win;
+}
+
+void TicTacToeUtil::allocBoardInServer()
+{
+    cout << GREEN_BOLD << "[CREATING 3X3 TIC TAC TOE BOARD: " << driver->get_nid() << " ]"<< COL_RESET << endl;
+    try 
+    {
+		this->driver->dsm_malloc("board", sizeof(int)* this->arraySize);
+        
+        //set in server
+        this->setBoardToServer();
+        
+	} catch (DsmException dsme) {
+		// There may be several processes doing a dsm_malloc, only the first one will succeed 
+		cerr << RED_BOLD << "[ERROR in dsm_malloc(\"Board\", sizeof(" << sizeof(int) * this->arraySize << ")): " << dsme << " ]" << COL_RESET << endl;
+		exit(1);
+	}
+}
 /*int main()
 {
 
