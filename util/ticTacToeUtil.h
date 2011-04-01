@@ -35,6 +35,7 @@ class TicTacToeUtil
     int getTurnFromServer();
     void setTurnToServer(int turn);
     int getWinFromServer();
+    void setWinToServer(int win);
     void allocBoardInServer();
     
 };

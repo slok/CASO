@@ -74,18 +74,19 @@ int main(int argc, char** argv) {
         //gameloop
         while(!exitLoop)
         {
-            
-           
-            
-            system("clear"); //*nix
-            //system("cls"); //windows
-            ttt.getBoardFromServer();
-            ttt.drawMatrix();
+            //1 - get basic variables(turn...)
             turn = ttt.getTurnFromServer();
             win = ttt.getWinFromServer();
+            ttt.getBoardFromServer();
+            system("clear"); //*nix
+            //system("cls"); //windows
+            ttt.drawMatrix(); 
+    
+            //2 - check if the game has finished(win, or not)
             
             if( win == -1)
             {
+                //3 - check if is our turn, if not, wait
                 if( turn == 0)
                 {
                     cout << RED_BOLD << "IS REFEREES TURN" << COL_RESET << endl;
@@ -100,24 +101,31 @@ int main(int argc, char** argv) {
                 }
                 else //our turn
                 {
-                    //ask for the position
-                    cout << CYAN_BOLD << "SELECT X:" << endl;
+                    //4 - for the position
+                    cout << CYAN_BOLD << "SELECT X:" << COL_RESET;
                     getline(cin, aux);
                     x = atoi(aux.c_str());
-                    cout << CYAN_BOLD << "SELECT y:" << endl;
+                    cout << CYAN_BOLD << "SELECT y:" << COL_RESET;
                     getline(cin, aux);
                     y = atoi(aux.c_str());
                     x-=1; y-=1;
                     
+                    //5 - update in the server
                     //set position
                     ttt.board2D[x][y] = player - 1;
-                    //ttt.drawMatrix(); //si quito esto no tira, si lo pongo si :s ¿?¿?¿?¿
                     ttt.setBoardToServer();
-                    
+                    //set referees turn
+                    ttt.setTurnToServer(0);
+                    //this is to destroy the notification in the stack that we make when we put the refereees turn
+                    ttt.getDriver()->dsm_wait("turn");
                 }
+            //6 - wait for the turn
+            ttt.getDriver()->dsm_wait("turn");
             }
             else
             {
+                cout << YELLOW_BOLD <<"GAME OVER!!!" << COL_RESET << endl;
+                exitLoop = true;
                 //game has finished(have we win??)
             }
         }

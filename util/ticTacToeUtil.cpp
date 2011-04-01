@@ -95,6 +95,7 @@ bool TicTacToeUtil::checkBoardComplete()
 
 int TicTacToeUtil::checkBoardState()
 {
+    // 0 = nobody, 1 = player1, 2 = player2
     int win;
     
     if( (board2D[0][0] == CROSS && board2D[0][0] == board2D[0][1] && board2D[0][1] == board2D[0][2]) || (board2D[1][0] == CROSS && board2D[1][0] == board2D[1][1] && board2D[1][1] == board2D[1][2]) ||
@@ -203,7 +204,7 @@ int TicTacToeUtil::getTurnFromServer()
 void TicTacToeUtil::setTurnToServer(int turn)
 {
     //referee's turn
-    turn = 0;
+    //turn = 0;
     try {
         this->driver->dsm_put("turn", (void *)&turn, sizeof(turn)); 
     } catch (DsmException dsme) {
@@ -232,7 +233,16 @@ int TicTacToeUtil::getWinFromServer()
     }
     return win;
 }
-
+void TicTacToeUtil::setWinToServer(int win)
+{
+    try {
+        this->driver->dsm_put("win", (void *)&win, sizeof(win)); 
+    } catch (DsmException dsme) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"win\", win, " << sizeof(win) << ")): " << dsme << COL_RESET << endl;
+        driver->dsm_free("board");
+        exit(1);
+    }
+}
 void TicTacToeUtil::allocBoardInServer()
 {
     cout << GREEN_BOLD << "[CREATING 3X3 TIC TAC TOE BOARD: " << driver->get_nid() << " ]"<< COL_RESET << endl;

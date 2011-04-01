@@ -90,12 +90,38 @@ int main(int argc, char** argv) {
 		cerr << RED_BOLD << "[ERROR in dsm_malloc(\"win\", sizeof(" << sizeof(win) << ")): " << dsme << " ]" << COL_RESET << endl;
 		exit(1);
 	}
-    ttt.getBoardFromServer();
-    ttt.drawMatrix();
+    //the first time we are waiting, adn we have in the stack a notification of the initialization, so we have to use that utilization
+    //ttt.getDriver()->dsm_wait("turn");
+    
     while(1)
     {
+        //1 - wait for the turn
+        cout << GREEN_BOLD <<"[WAITING FOR TURN...]" << COL_RESET << endl;
+        //we have to wait 2 times, because the one that we put in the stack counts to...
+        ttt.getDriver()->dsm_wait("turn");
+        ttt.getDriver()->dsm_wait("turn");
+        
+        //2 - get all the variables
         ttt.getBoardFromServer();
-        ttt.drawMatrix();
+        turn = ttt.getTurnFromServer();
+        
+        //3 -check if the game is over or not (1 = not finished, 0 = nobody, 1 = player1, 2 = player2)
+        win = ttt.checkBoardState();
+        win++; //this return returns 0 and 1 and we want 1 and 2 if circle or croos have won
+        if(win < 1) //we have to determine if the board is finished or we can go on playing
+        {
+            if(ttt.checkBoardComplete())
+                win = -1;
+            else
+                win = 0;
+        }
+        //4 - the next in the turn is...
+        next = next==2?1:2;
+        //5 - set the variables in the server
+        ttt.setBoardToServer();
+        ttt.setTurnToServer(next);
+        ttt.setWinToServer(win);       
+        
     }
     
     
