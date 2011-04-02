@@ -87,7 +87,7 @@ void TicTacToeUtil::drawMatrix1D()
 
 bool TicTacToeUtil::checkBoardComplete()
 {
-    bool complete = false;
+    bool complete = true;
     
     //check if the board is complete
     for(int i=0; i < 3; i++)
@@ -96,7 +96,7 @@ bool TicTacToeUtil::checkBoardComplete()
         {
             if(this->board2D[i][j] == BLANK)
             {
-                complete = true;
+                complete = false;
                 break;
             }
         }
@@ -270,6 +270,37 @@ void TicTacToeUtil::allocBoardInServer()
 		cerr << RED_BOLD << "[ERROR in dsm_malloc(\"Board\", sizeof(" << sizeof(int) * this->arraySize << ")): " << dsme << " ]" << COL_RESET << endl;
 		exit(1);
 	}
+}
+
+void TicTacToeUtil::setAgainToServer(bool again)
+{
+    //store turn for the first one
+    try {
+        this->driver->dsm_put("again", (void *)&again, sizeof(again));
+    } catch (DsmException dsme) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"again\", again, " << sizeof(again) << ")): " << dsme << COL_RESET << endl;
+        this->driver->dsm_free("again");
+        exit(1);
+    }
+}
+bool TicTacToeUtil::getAgainFromServer()
+{
+    PracticaCaso::DsmData data;
+    bool again;
+    //get the board
+    cout << GREEN_BOLD << "[GETTING AGAIN: " << this->driver->get_nid() << " ]"<< COL_RESET << endl;
+    bool againGet = false;
+    while (!againGet) {
+        try {
+            data = this->driver->dsm_get("again");
+            again = *((bool *)data.addr);
+            againGet = true;
+        } catch (DsmException dsme) {
+            cout << RED_BOLD << "WAITING FOR AGAIN VARIABLE "<< COL_RESET<< endl;
+            this->driver->dsm_wait("again");
+        }
+    }
+    return again;
 }
 /*int main()
 {

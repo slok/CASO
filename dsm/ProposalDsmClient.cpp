@@ -19,6 +19,18 @@ void usage() {
 	exit(1);
 }
 
+void setAgain(TicTacToeUtil ttt, bool again)
+{
+    //store turn for the first one
+    try {
+        ttt.getDriver()->dsm_put("again", (void *)&again, sizeof(again));
+    } catch (DsmException dsme) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"again\", again, " << sizeof(again) << ")): " << dsme << COL_RESET << endl;
+        ttt.getDriver()->dsm_free("again");
+        exit(1);
+    }
+}
+
 
 int main(int argc, char** argv) {
 
@@ -131,11 +143,50 @@ int main(int argc, char** argv) {
             //6 - wait for the turn
             ttt.getDriver()->dsm_wait("turn");
             }
-            else
+            else //check the other cases that are after finished the game
             {
+                switch(win)
+                {
+                    case -1:
+                    {
+                         cout << YELLOW_BOLD << "NO BODY HAS WON THE GAME :(" << COL_RESET << endl;
+                        break;
+                    }
+                    case 1:
+                    {
+                        cout << YELLOW_BOLD << "PLAYER 1 HAS WON" << COL_RESET << endl;
+                        break;
+                    }
+                    case 2:
+                    {
+                        cout << YELLOW_BOLD <<"PLAYER 2 HAS WON" << COL_RESET << endl;
+                        break;
+                    }
+                }
                 cout << YELLOW_BOLD <<"GAME OVER!!!" << COL_RESET << endl;
-                exitLoop = true;
-                //game has finished(have we win??)
+                
+                bool ask=true;
+                string cont;
+                while(ask)
+                {
+                    cout << MAGENTA_BOLD <<"DO YOU WANT TO CONTINUE PLAYING? (y/n): " << COL_RESET << endl;
+                    getline(cin, cont);
+                    if(cont.find("y") == 0)
+                    {
+                        ttt.setAgainToServer(true);
+                        ask = false;
+                    }
+                    else if(cont.find("n") == 0)
+                    {
+                        ttt.setAgainToServer(false);
+                        ask = false;
+                        exitLoop  = true;
+                    }
+                }
+                //give turn to server
+                ttt.setTurnToServer(0);
+                ttt.getDriver()->dsm_wait("turn");
+                ttt.getDriver()->dsm_wait("turn");
             }
         }
     }

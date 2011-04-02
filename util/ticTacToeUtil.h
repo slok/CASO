@@ -38,6 +38,8 @@ class TicTacToeUtil
     int getWinFromServer();
     void setWinToServer(int win);
     void allocBoardInServer();
+    void setAgainToServer(bool again);
+    bool getAgainFromServer();
     
 };
 #endif
