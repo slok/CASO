@@ -13,16 +13,17 @@ class TicTacToeUtil
 {
     private:
     int *board1D;
+    int board2D[3][3];
     PracticaCaso::DsmDriver *driver;
     int arraySize; //this is for the sizeof
     
     public:
-    int board2D[3][3]; //this is a bad thing, but we can't return multidimensional array
-
+    
     PracticaCaso::DsmDriver *getDriver();
     int *getBoard1D();
     //int **getboard2D();
     TicTacToeUtil(string ip, int port, string dns);
+    bool setPositionInBoard(int player, int x, int y);
     void initializeBoard();
     void drawMatrix();
     void drawMatrix1D();

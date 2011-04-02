@@ -10,6 +10,18 @@ TicTacToeUtil::TicTacToeUtil(string ip, int port, string dns)
     this->initializeBoard();
 
 }
+//returns 1 if the assignation was sucessful
+bool TicTacToeUtil::setPositionInBoard(int player, int x, int y)
+{
+    bool result = false;
+    if(this->board2D[x][y] == -1)
+    {
+        this->board2D[x][y] = player;
+        result = true;
+    }
+    return result;
+}
+
 PracticaCaso::DsmDriver *TicTacToeUtil::getDriver()
 {
     return this->driver;

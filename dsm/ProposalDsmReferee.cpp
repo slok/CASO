@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
     {
         //1 - wait for the turn
         cout << GREEN_BOLD <<"[WAITING FOR TURN...]" << COL_RESET << endl;
-        //we have to wait 2 times, because the one that we put in the stack counts to...
+        //we have to wait 2 times, because the one that we put in the stack counts too...
         ttt.getDriver()->dsm_wait("turn");
         ttt.getDriver()->dsm_wait("turn");
         

@@ -102,17 +102,26 @@ int main(int argc, char** argv) {
                 else //our turn
                 {
                     //4 - for the position
-                    cout << CYAN_BOLD << "SELECT X:" << COL_RESET;
-                    getline(cin, aux);
-                    x = atoi(aux.c_str());
-                    cout << CYAN_BOLD << "SELECT y:" << COL_RESET;
-                    getline(cin, aux);
-                    y = atoi(aux.c_str());
-                    x-=1; y-=1;
-                    
+                    bool ask = true; 
+                    while(ask)
+                    {
+                        cout << CYAN_BOLD << "SELECT X:" << COL_RESET;
+                        getline(cin, aux);
+                        x = atoi(aux.c_str());
+                        cout << CYAN_BOLD << "SELECT y:" << COL_RESET;
+                        getline(cin, aux);
+                        y = atoi(aux.c_str());
+                        x-=1; y-=1;
+                        
+                        //player -1 because we have player1 = 1 and player2 = 2 and we want circle = 0 and cross = 1
+                        //if the assignation returns false then, there was an error
+                        if(ttt.setPositionInBoard(player-1,x ,y ))
+                            ask = false;
+                        else
+                            cout << RED_BOLD << "THAT POSITION WASN'T EMPTY OR DOESN'T EXIST, TRY AGAIN PLEASE..." << COL_RESET << endl;
+                    }
                     //5 - update in the server
-                    //set position
-                    ttt.board2D[x][y] = player - 1;
+                    
                     ttt.setBoardToServer();
                     //set referees turn
                     ttt.setTurnToServer(0);
