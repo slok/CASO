@@ -183,10 +183,20 @@ int main(int argc, char** argv) {
                         exitLoop  = true;
                     }
                 }
-                //give turn to server
-                ttt.setTurnToServer(0);
+                //We have set in the turn in the previous cycle
+                /*
+                //if the turn has been set by the other player, we don't have to put
+                if(ttt.getTurnFromServer() != 0)
+                {
+                    //give turn to server
+                    ttt.setTurnToServer(0);
+                    //destroy our set notification
+                    ttt.getDriver()->dsm_wait("turn");
+                }*/
+                
+                //wait
                 ttt.getDriver()->dsm_wait("turn");
-                ttt.getDriver()->dsm_wait("turn");
+                
             }
         }
     }

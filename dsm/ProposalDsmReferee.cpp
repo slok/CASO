@@ -92,29 +92,15 @@ void createAgain(TicTacToeUtil ttt)
 //resets variables(win, board and turn)
 void resetAll(TicTacToeUtil ttt)
 {
+    cout << RED_BOLD << "RESETING VALUES..." << COL_RESET<< endl;
     //reset variables
     int turn = 1, win= -1;
     ttt.initializeBoard();
     
     //set variables in server
-    try 
-    {
-        ttt.getDriver()->dsm_put("win", (void *)&win, sizeof(win));
-    } catch (DsmException dsme) {
-        cerr << RED_BOLD << "ERROR: dsm_put(\"win\", win, " << sizeof(win) << ")): " << dsme << COL_RESET << endl;
-        ttt.getDriver()->dsm_free("turn");
-        exit(1);
-    }
-    
-    try 
-    {
-        ttt.getDriver()->dsm_put("turn", (void *)&turn, sizeof(turn));
-    } catch (DsmException dsme) {
-        cerr << RED_BOLD << "ERROR: dsm_put(\"turn\", turn, " << sizeof(turn) << ")): " << dsme << COL_RESET << endl;
-        ttt.getDriver()->dsm_free("turn");
-        exit(1);
-    }
-    
+    ttt.setWinToServer(win);
+    ttt.setTurnToServer(turn);
+    ttt.getDriver()->dsm_wait("turn"); //we have to counteract the set of turn notification
     ttt.setBoardToServer();
 }
 
@@ -123,6 +109,12 @@ void again(TicTacToeUtil ttt, int win)
     //the client at this moment is waiting for a turn, so to break the deadlock(interbloqueo) 
     //because we need that the client set the again. I other words, referee is waiting "again notification" and client is waiting "turn notification"
     ttt.setTurnToServer(0);
+    
+    /*we have to counteract the set of turn notification, but the players don't put the turn, 
+    because they did ir already in the previous cycle, so we omit this wait, because in the main 
+    loop of the referee we have 2 waits :D 
+    ttt.getDriver()->dsm_wait("turn"); */
+    
     ttt.setWinToServer(win);
     //we want both results if one is no, the other one cat play
     ttt.getDriver()->dsm_wait("again");
@@ -133,7 +125,6 @@ void again(TicTacToeUtil ttt, int win)
             resetAll(ttt);
     }
    
-    
 }
 
 int main(int argc, char** argv) {
@@ -163,14 +154,14 @@ int main(int argc, char** argv) {
     /////////////////create Again/////////////////////////
     createAgain(ttt);
     
-    //the first time we are waiting, adn we have in the stack a notification of the initialization, so we have to use that utilization
-    //ttt.getDriver()->dsm_wait("turn");
-    
+    int pruebar = 0;
     while(1)
     {
+        pruebar++;
         //1 - wait for the turn
         cout << GREEN_BOLD <<"[WAITING FOR TURN...]" << COL_RESET << endl;
-        //we have to wait 2 times, because the one that we put in the stack counts too...
+        
+        //we have to wait 2 times, because the one that we put in the stack counts too... so we delete it
         ttt.getDriver()->dsm_wait("turn");
         ttt.getDriver()->dsm_wait("turn");
         
@@ -179,8 +170,6 @@ int main(int argc, char** argv) {
         turn = ttt.getTurnFromServer();
         
         //3 -check if the game is over or not (1 = not finished, 0 = nobody, 1 = player1, 2 = player2)
-        
-        
         win = ttt.checkBoardState();
         win++; //this return returns 0 and 1 and we want 1 and 2 if circle or croos have won
         
@@ -202,7 +191,6 @@ int main(int argc, char** argv) {
                 {
                     win = 0;
                     again(ttt, win);
-                    
                 }
                 break;
             }
