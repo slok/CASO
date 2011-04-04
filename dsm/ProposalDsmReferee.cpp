@@ -77,10 +77,19 @@ void createWin(TicTacToeUtil ttt, int win)
 
 void createAgain(TicTacToeUtil ttt)
 {
-    bool again=false;
+    bool again=true;
     try 
     {
 		ttt.getDriver()->dsm_malloc("again", sizeof(again));
+        try {
+            ttt.getDriver()->dsm_put("again", (void *)&again, sizeof(again));
+            //counter the put
+            ttt.getDriver()->dsm_wait("again");
+        } catch (DsmException dsme) {
+            cerr << RED_BOLD << "ERROR: dsm_put(\"again\", again, " << sizeof(again) << ")): " << dsme << COL_RESET << endl;
+            ttt.getDriver()->dsm_free("again");
+            exit(1);
+        }
     } catch (DsmException dsme) {
 		// There may be several processes doing a dsm_malloc, only the first one will succeed 
 		cerr << RED_BOLD << "[ERROR in dsm_malloc(\"again\", sizeof(" << sizeof(again) << ")): " << dsme << " ]" << COL_RESET << endl;
@@ -118,12 +127,19 @@ void again(TicTacToeUtil ttt, int win)
     ttt.setWinToServer(win);
     //we want both results if one is no, the other one cat play
     ttt.getDriver()->dsm_wait("again");
-    if(ttt.getAgainFromServer())
+    
+    //we have 2 options:
+    //1 (the game could continue = reset always)
+    ttt.getDriver()->dsm_wait("again");
+    resetAll(ttt);
+    
+    //2 the game will finish after the players colose connection, so only reset if we are going to play again
+    /*if(ttt.getAgainFromServer())
     {
         ttt.getDriver()->dsm_wait("again");
         if(ttt.getAgainFromServer())
             resetAll(ttt);
-    }
+    }*/
    
 }
 

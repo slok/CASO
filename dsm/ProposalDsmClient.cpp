@@ -30,6 +30,39 @@ void setAgain(TicTacToeUtil ttt, bool again)
         exit(1);
     }
 }
+void leaveGame(TicTacToeUtil ttt)
+{
+    int numPlayers;
+    bool playersGet = false;
+	PracticaCaso::DsmData data;
+    
+    //get the player
+    cout << RED_BOLD << "leaving the game" << COL_RESET << endl;
+    while (!playersGet) {
+		try {
+			cout << GREEN_BOLD << "[GETTING NUMBER OF PLAYERS: " << ttt.getDriver()->get_nid() << " ]"<< COL_RESET << endl;
+            data = ttt.getDriver()->dsm_get("numPlayers");
+            numPlayers = *((int *)data.addr);
+			playersGet = true;
+		} catch (DsmException dsme) {
+			cerr << RED_BOLD << "ERROR: Referee not connected, waiting..." << dsme << COL_RESET<< endl;
+			ttt.getDriver()->dsm_wait("numPlayers");
+		}
+	}
+    
+    //set the player number
+    numPlayers--;
+    
+    try 
+    {
+            cout << GREEN_BOLD << "[DECREMENTING NUMBER OF PLAYERS: " << ttt.getDriver()->get_nid() << " ]"<< COL_RESET << endl;
+			ttt.getDriver()->dsm_put("numPlayers", (void *)&numPlayers, sizeof(numPlayers));
+		} catch (...) {
+			cerr << RED_BOLD << "ERROR: dsm_put(\"numPlayers\", (void *)&numPlayers, sizeof(numPlayers))" << COL_RESET << endl;
+			exit(1);
+    }
+    
+}
 
 
 int main(int argc, char** argv) {
@@ -53,14 +86,13 @@ int main(int argc, char** argv) {
 		try {
 			cout << GREEN_BOLD << "[GETTING NUMBER OF PLAYERS: " << driver->get_nid() << " ]"<< COL_RESET << endl;
             data = driver->dsm_get("numPlayers");
+            numPlayers = *((int *)data.addr);
 			playersGet = true;
 		} catch (DsmException dsme) {
 			cerr << RED_BOLD << "ERROR: Referee not connected, waiting..." << dsme << COL_RESET<< endl;
 			driver->dsm_wait("numPlayers");
 		}
 	}
-    
-    numPlayers = *((int *)data.addr);
     
     //check number of players
     if(numPlayers < 2)
@@ -171,10 +203,25 @@ int main(int argc, char** argv) {
                 {
                     cout << MAGENTA_BOLD <<"DO YOU WANT TO CONTINUE PLAYING? (y/n): " << COL_RESET << endl;
                     getline(cin, cont);
+                    
+                    //if one of the players already has say that don't want to continue, we can't continue too
+                    if( (!ttt.getAgainFromServer()) && (cont.find("y") == 0) )
+                    {
+                        cout << RED_BOLD << "Sorry, the other player didn't want to play" << COL_RESET <<endl;
+                        cont = "n";
+                    }
+                       
                     if(cont.find("y") == 0)
                     {
                         ttt.setAgainToServer(true);
                         ask = false;
+                        
+                        //only wait if we have to continue playing
+                        ttt.getDriver()->dsm_wait("turn");
+                        
+                        //now we have to check if the other player has ansered no again
+                        exitLoop  = !ttt.getAgainFromServer()?true:false;
+                        
                     }
                     else if(cont.find("n") == 0)
                     {
@@ -193,17 +240,14 @@ int main(int argc, char** argv) {
                     //destroy our set notification
                     ttt.getDriver()->dsm_wait("turn");
                 }*/
-                
-                //wait
-                ttt.getDriver()->dsm_wait("turn");
-                
             }
         }
     }
     else
         cout << RED_BOLD << "ERROR: Two players connected..." << COL_RESET<< endl;
     
-	cout << GREEN_BOLD << "[SLEEPING FOR A SECOND BEFORE FINISHING...]" << COL_RESET << endl;
+	leaveGame(ttt);
+    cout << GREEN_BOLD << "[SLEEPING FOR A SECOND BEFORE FINISHING...]" << COL_RESET << endl;
 	sleep(1);
 	delete driver;
 }
