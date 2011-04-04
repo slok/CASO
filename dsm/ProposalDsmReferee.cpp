@@ -154,10 +154,8 @@ int main(int argc, char** argv) {
     /////////////////create Again/////////////////////////
     createAgain(ttt);
     
-    int pruebar = 0;
     while(1)
     {
-        pruebar++;
         //1 - wait for the turn
         cout << GREEN_BOLD <<"[WAITING FOR TURN...]" << COL_RESET << endl;
         
