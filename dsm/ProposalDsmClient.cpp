@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
                         ttt.getDriver()->dsm_wait("turn");
                         
                         //stop a little, the threads are very fast :S 
-                        cout << GREEN_BOLD << "Waiting 2 seconds, please wait..." << RES_COLOR << endl;
+                        cout << GREEN_BOLD << "[WAITING 2 SECONDS, PLEASE BE PATIENT...]" << COL_RESET << endl;
                         sleep(2);
                         
                         //now we have to check if the other player has ansered no or yes (if he has gone then, we get out too)
