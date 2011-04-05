@@ -55,11 +55,11 @@ void leaveGame(TicTacToeUtil ttt)
     
     try 
     {
-            cout << GREEN_BOLD << "[DECREMENTING NUMBER OF PLAYERS: " << ttt.getDriver()->get_nid() << " ]"<< COL_RESET << endl;
-			ttt.getDriver()->dsm_put("numPlayers", (void *)&numPlayers, sizeof(numPlayers));
-		} catch (...) {
-			cerr << RED_BOLD << "ERROR: dsm_put(\"numPlayers\", (void *)&numPlayers, sizeof(numPlayers))" << COL_RESET << endl;
-			exit(1);
+        cout << GREEN_BOLD << "[DECREMENTING NUMBER OF PLAYERS: " << ttt.getDriver()->get_nid() << " ]"<< COL_RESET << endl;
+        ttt.getDriver()->dsm_put("numPlayers", (void *)&numPlayers, sizeof(numPlayers));
+    } catch (...) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"numPlayers\", (void *)&numPlayers, sizeof(numPlayers))" << COL_RESET << endl;
+        exit(1);
     }
     
 }
@@ -81,18 +81,7 @@ int main(int argc, char** argv) {
     bool exitLoop = false;
     
     //get number of players and check referee connected
-    bool playersGet = false;
-	while (!playersGet) {
-		try {
-			cout << GREEN_BOLD << "[GETTING NUMBER OF PLAYERS: " << driver->get_nid() << " ]"<< COL_RESET << endl;
-            data = driver->dsm_get("numPlayers");
-            numPlayers = *((int *)data.addr);
-			playersGet = true;
-		} catch (DsmException dsme) {
-			cerr << RED_BOLD << "ERROR: Referee not connected, waiting..." << dsme << COL_RESET<< endl;
-			driver->dsm_wait("numPlayers");
-		}
-	}
+    numPlayers = ttt.getNumPlayersFromServer();
     
     //check number of players
     if(numPlayers < 2)
@@ -219,8 +208,13 @@ int main(int argc, char** argv) {
                         //only wait if we have to continue playing
                         ttt.getDriver()->dsm_wait("turn");
                         
-                        //now we have to check if the other player has ansered no again
-                        exitLoop  = !ttt.getAgainFromServer()?true:false;
+                        //stop a little, the threads are very fast :S 
+                        cout << GREEN_BOLD << "Waiting 2 seconds, please wait..." << RES_COLOR << endl;
+                        sleep(2);
+                        
+                        //now we have to check if the other player has ansered no or yes (if he has gone then, we get out too)
+                        exitLoop  = (ttt.getNumPlayersFromServer() == 1 )?true:false;
+                        
                         
                     }
                     else if(cont.find("n") == 0)
@@ -246,8 +240,10 @@ int main(int argc, char** argv) {
     else
         cout << RED_BOLD << "ERROR: Two players connected..." << COL_RESET<< endl;
     
-	leaveGame(ttt);
     cout << GREEN_BOLD << "[SLEEPING FOR A SECOND BEFORE FINISHING...]" << COL_RESET << endl;
+    //if we don't sleep, referee and client colapse between them
 	sleep(1);
-	delete driver;
+	leaveGame(ttt);
+	
+    delete driver;
 }

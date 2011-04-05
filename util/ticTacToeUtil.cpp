@@ -302,6 +302,25 @@ bool TicTacToeUtil::getAgainFromServer()
     }
     return again;
 }
+int TicTacToeUtil::getNumPlayersFromServer()
+{
+    PracticaCaso::DsmData data;
+    int numPlayers;
+    bool playersGet = false;
+	while (!playersGet) {
+		try {
+			cout << GREEN_BOLD << "[GETTING NUMBER OF PLAYERS: " << driver->get_nid() << " ]"<< COL_RESET << endl;
+            data = driver->dsm_get("numPlayers");
+            numPlayers = *((int *)data.addr);
+			playersGet = true;
+		} catch (DsmException dsme) {
+			cerr << RED_BOLD << "ERROR: Referee not connected, waiting..." << dsme << COL_RESET<< endl;
+			driver->dsm_wait("numPlayers");
+		}
+	}
+    return numPlayers;
+}
+
 /*int main()
 {
 

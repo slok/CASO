@@ -104,9 +104,12 @@ void resetAll(TicTacToeUtil ttt)
     cout << RED_BOLD << "RESETING VALUES..." << COL_RESET<< endl;
     //reset variables
     int turn = 1, win= -1;
+    bool again = true;
     ttt.initializeBoard();
     
     //set variables in server
+    ttt.setAgainToServer(again);
+    ttt.getDriver()->dsm_wait("again"); //counter the set again
     ttt.setWinToServer(win);
     ttt.setTurnToServer(turn);
     ttt.getDriver()->dsm_wait("turn"); //we have to counteract the set of turn notification
@@ -184,6 +187,7 @@ int main(int argc, char** argv) {
         turn = ttt.getTurnFromServer();
         
         //3 -check if the game is over or not (1 = not finished, 0 = nobody, 1 = player1, 2 = player2)
+        sleep(0.5);
         win = ttt.checkBoardState();
         win++; //this return returns 0 and 1 and we want 1 and 2 if circle or croos have won
         

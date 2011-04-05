@@ -40,6 +40,7 @@ class TicTacToeUtil
     void allocBoardInServer();
     void setAgainToServer(bool again);
     bool getAgainFromServer();
+    int getNumPlayersFromServer();
     
 };
 #endif
