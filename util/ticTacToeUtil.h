@@ -9,6 +9,7 @@
 #define CROSS 1
 #define CIRCLE 0
 #define BLANK -1
+
 class TicTacToeUtil
 {
     private:
@@ -41,6 +42,10 @@ class TicTacToeUtil
     void setAgainToServer(bool again);
     bool getAgainFromServer();
     int getNumPlayersFromServer();
+    void setPlayerName1(string name);
+    void setPlayerName2(string name);
+    char *getPlayerName1FromServer();
+    char *getPlayerName2FromServer();
     
 };
 #endif

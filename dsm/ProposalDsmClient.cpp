@@ -15,7 +15,7 @@
 
 
 void usage() {
-	cout << "Usage: ProposalDsmClient <port> <dns>" << endl;
+	cout << "Usage: ProposalDsmClient <port> <dns> <player name>" << endl;
 	exit(1);
 }
 
@@ -67,7 +67,7 @@ void leaveGame(TicTacToeUtil ttt)
 
 int main(int argc, char** argv) {
 
-	if (argc != 3) {
+	if (argc != 4) {
 		usage();
 	}
 
@@ -104,6 +104,11 @@ int main(int argc, char** argv) {
         //cout << CYAN << "Select Player name: " << COL_RESET << endl;
         //getline(cin, name);
         
+        if (player == 1)
+            ttt.setPlayerName1(argv[3]);
+        else
+            ttt.setPlayerName2(argv[3]);
+            
         //gameloop
         while(!exitLoop)
         {
@@ -114,7 +119,7 @@ int main(int argc, char** argv) {
             system("clear"); //*nix
             //system("cls"); //windows
             ttt.drawMatrix(); 
-    
+            sleep(0.25);
             //2 - check if the game has finished(win, or not)
             
             if( win == -1)

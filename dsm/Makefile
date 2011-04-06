@@ -33,7 +33,7 @@ DsmTimeClient: DsmTimeClient.o
 	$(CC) DsmTimeClient.o $(LDFLAGS) -L. -lesidedsm -o DsmTimeClient
 
 ProposalDsmReferee.bin: ProposalDsmReferee.o
-	$(CC) ProposalDsmReferee.o $(LDFLAGS) -L. -lesidedsm -lcasotictactoe -o ProposalDsmReferee
+	$(CC) ProposalDsmReferee.o $(LDFLAGS) -L. -lesidedsm -lcasotictactoe -lesidesqlite -o ProposalDsmReferee
 
 ProposalDsmClient.bin: ProposalDsmClient.o
 	$(CC) ProposalDsmClient.o $(LDFLAGS) -L. -lesidedsm -lcasotictactoe -o ProposalDsmClient

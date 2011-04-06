@@ -321,6 +321,70 @@ int TicTacToeUtil::getNumPlayersFromServer()
     return numPlayers;
 }
 
+void TicTacToeUtil::setPlayerName1(string name)
+{
+    //store turn for the first one
+    try {
+        this->driver->dsm_put("playerName1", (void *)name.c_str(), sizeof(name));
+    } catch (DsmException dsme) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"playerName1\", playerName1, " << sizeof(name) << ")): " << dsme << COL_RESET << endl;
+        this->driver->dsm_free("playerName1");
+        exit(1);
+    }
+}
+
+void TicTacToeUtil::setPlayerName2(string name)
+{
+    //store turn for the first one
+    try {
+        this->driver->dsm_put("playerName2", (void *)name.c_str(), sizeof(name));
+    } catch (DsmException dsme) {
+        cerr << RED_BOLD << "ERROR: dsm_put(\"playerName2\", playerName2, " << sizeof(name) << ")): " << dsme << COL_RESET << endl;
+        this->driver->dsm_free("playerName2");
+        exit(1);
+    }
+}
+
+char *TicTacToeUtil::getPlayerName1FromServer()
+{
+    PracticaCaso::DsmData data;
+    char *player;
+    
+    bool playersGet = false;
+	while (!playersGet) {
+		try {
+			cout << GREEN_BOLD << "[GETTING NAME OF PLAYER 1: " << driver->get_nid() << " ]"<< COL_RESET << endl;
+            data = driver->dsm_get("playerName1");
+            player = ((char *)data.addr);
+			playersGet = true;
+		} catch (DsmException dsme) {
+			cerr << RED_BOLD << "ERROR: Referee not connected, waiting..." << dsme << COL_RESET<< endl;
+			driver->dsm_wait("playerName1");
+		}
+	}
+    return player;
+}
+
+char *TicTacToeUtil::getPlayerName2FromServer()
+{
+    PracticaCaso::DsmData data;
+    char *player;
+    
+    bool playersGet = false;
+	while (!playersGet) {
+		try {
+			cout << GREEN_BOLD << "[GETTING NAME OF PLAYER 2: " << driver->get_nid() << " ]"<< COL_RESET << endl;
+            data = driver->dsm_get("playerName2");
+            player = ((char *)data.addr);
+			playersGet = true;
+		} catch (DsmException dsme) {
+			cerr << RED_BOLD << "ERROR: Referee not connected, waiting..." << dsme << COL_RESET<< endl;
+			driver->dsm_wait("playerName2");
+		}
+	}
+    return player;
+}
+
 /*int main()
 {
 

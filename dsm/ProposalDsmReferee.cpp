@@ -2,6 +2,7 @@
 #include "Dsm.h"
 #include "colors.h"
 #include "ticTacToeUtil.h"
+#include "SQLiteMap.h"
 
 #define BUFFER_SIZE 1024
 
@@ -98,6 +99,21 @@ void createAgain(TicTacToeUtil ttt)
 
 }
 
+void createPlayerNames(TicTacToeUtil ttt)
+{
+    char name[50];
+    try 
+    {
+		ttt.getDriver()->dsm_malloc("playerName1", sizeof(name));
+        ttt.getDriver()->dsm_malloc("playerName2", sizeof(name));
+    } catch (DsmException dsme) {
+		// There may be several processes doing a dsm_malloc, only the first one will succeed 
+		cerr << RED_BOLD << "[ERROR in dsm_malloc(\"playerX\", sizeof(" << sizeof(name) << ")): " << dsme << " ]" << COL_RESET << endl;
+		exit(1);
+	}
+
+}
+
 //resets variables(win, board and turn)
 void resetAll(TicTacToeUtil ttt)
 {
@@ -116,8 +132,42 @@ void resetAll(TicTacToeUtil ttt)
     ttt.setBoardToServer();
 }
 
-void again(TicTacToeUtil ttt, int win)
+bool firstTime(TicTacToeUtil ttt, int p1, int p2)
 {
+    stringstream intStrAux;
+    bool first = false;
+    PracticaCaso::SQLiteMap * SQLiteMap = new PracticaCaso::SQLiteMap("scores.db");
+    
+    //reset for first time (new player)  and save it if not again
+    if(!ttt.getAgainFromServer())
+    {
+        cout << CYAN_BOLD << p1 <<" | "<< p2 << COL_RESET << endl;
+        
+        //no negative points in database
+        if(p1 < 0)
+            p1 = 0;
+        if(p2 < 0)
+            p2 = 0;
+            
+        cout << CYAN_BOLD << "INSERTING SCORES IN DATABASE..." << COL_RESET << endl;
+        intStrAux.str("");
+        intStrAux << p1;
+        SQLiteMap->set(ttt.getPlayerName1FromServer(), intStrAux.str());
+        
+        intStrAux.str("");
+        intStrAux << p2;
+        SQLiteMap->set(ttt.getPlayerName2FromServer(), intStrAux.str());
+        first = true;
+    }
+    delete SQLiteMap;
+    return first;
+}
+
+bool again(TicTacToeUtil ttt, int win, int p1, int p2)
+{
+    //returns if is again a first time of new roud of new players
+    
+    bool first= false;
     //the client at this moment is waiting for a turn, so to break the deadlock(interbloqueo) 
     //because we need that the client set the again. I other words, referee is waiting "again notification" and client is waiting "turn notification"
     ttt.setTurnToServer(0);
@@ -134,6 +184,8 @@ void again(TicTacToeUtil ttt, int win)
     //we have 2 options:
     //1 (the game could continue = reset always)
     ttt.getDriver()->dsm_wait("again");
+    
+    first = firstTime(ttt, p1, p2);
     resetAll(ttt);
     
     //2 the game will finish after the players colose connection, so only reset if we are going to play again
@@ -143,8 +195,11 @@ void again(TicTacToeUtil ttt, int win)
         if(ttt.getAgainFromServer())
             resetAll(ttt);
     }*/
-   
+    
+    return first;
 }
+
+
 
 int main(int argc, char** argv) {
 
@@ -157,10 +212,11 @@ int main(int argc, char** argv) {
     TicTacToeUtil ttt("127.0.0.1", atoi(argv[1]), argv[2]);
     PracticaCaso::DsmDriver * driver = ttt.getDriver();
 	PracticaCaso::DsmData data;
+    PracticaCaso::SQLiteMap * SQLiteMap = new PracticaCaso::SQLiteMap("scores.db");
 
     int numPlayers, next=1, win = -1; // -1 = not finished, 0 = nobody, 1 = player1, 2 = player2
-    int turn = 1; //0 = referee, 1 = player1, 2 = player2 
-    
+    int points1, points2, turn = 1; //0 = referee, 1 = player1, 2 = player2 
+    bool first = true;
 	
     //////////////////create number players///////////////////////
     createNumberOfplayers(ttt, numPlayers);
@@ -172,9 +228,13 @@ int main(int argc, char** argv) {
     createWin(ttt, win);
     /////////////////create Again/////////////////////////
     createAgain(ttt);
+    ////////////////create Players////////////////////////
+    createPlayerNames(ttt);
     
+
     while(1)
     {
+        
         //1 - wait for the turn
         cout << GREEN_BOLD <<"[WAITING FOR TURN...]" << COL_RESET << endl;
         
@@ -183,6 +243,33 @@ int main(int argc, char** argv) {
         ttt.getDriver()->dsm_wait("turn");
         
         //2 - get all the variables
+        
+        if(first) //if is the first time of the game with new players then...
+        {
+            
+            cout << CYAN_BOLD << "GETTING SCORES IN DATABASE..." << COL_RESET << endl;
+            string aux = SQLiteMap->get(ttt.getPlayerName1FromServer());
+            
+            cout << CYAN_BOLD << aux << COL_RESET << endl;
+            
+            if(aux.c_str() > 0)
+                points1 = atoi(aux.c_str());
+            else
+                points1 = 0;
+            
+            aux = SQLiteMap->get(ttt.getPlayerName2FromServer());
+            cout << CYAN_BOLD << aux << COL_RESET << endl;
+            if(aux.c_str() > 0)
+                points2 = atoi(aux.c_str());
+            else
+                points2 = 0;
+            
+             cout << CYAN_BOLD << points1 <<" | "<< points2 << COL_RESET << endl;
+            
+            first = false;
+            
+        }
+        
         ttt.getBoardFromServer();
         turn = ttt.getTurnFromServer();
         
@@ -193,7 +280,7 @@ int main(int argc, char** argv) {
         
         switch(win)
         {
-            case 0: //not winner
+            case 0: //no winner
             {
                 if(!ttt.checkBoardComplete())
                 {
@@ -208,26 +295,35 @@ int main(int argc, char** argv) {
                 else
                 {
                     win = 0;
-                    again(ttt, win);
+                    first = again(ttt, win, points1, points2);
+                    next = 1;
                 }
                 break;
             }
             case 1: //circle wins
             {
-                
-                again(ttt, win);
+                points1++;
+                points2--;
+                first = again(ttt, win, points1, points2);
+                next = 1;
                 break;
             }
             case 2: //cross wins
             {
-                again(ttt, win);
+                points1--;
+                points2++;
+                first = again(ttt, win, points1, points2);
+                next = 1;
                 break;   
             }
+            
         }
-
+        
+        cout << YELLOW << first << endl;
     }
     
     
+    delete SQLiteMap;
     driver->dsm_free("numPlayers");
     driver->dsm_free("board");
     driver->dsm_free("turn");
