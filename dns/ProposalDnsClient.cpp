@@ -113,6 +113,7 @@ int main(int argc, char** argv) {
                 
                 //copy the string to have the original msg intact, the strtoken brokens
                 strcpy((char *)aux.c_str(),(char *)msg.c_str());
+                aux =  string(aux.c_str());
                 //split command
                 commandVec = extractCommandAndArgs(aux);
                 
