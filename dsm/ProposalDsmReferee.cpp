@@ -274,7 +274,7 @@ int main(int argc, char** argv) {
         turn = ttt.getTurnFromServer();
         
         //3 -check if the game is over or not (1 = not finished, 0 = nobody, 1 = player1, 2 = player2)
-        sleep(0.5);
+        //sleep(0.5);
         win = ttt.checkBoardState();
         win++; //this return returns 0 and 1 and we want 1 and 2 if circle or croos have won
         

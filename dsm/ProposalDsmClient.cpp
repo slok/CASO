@@ -3,16 +3,7 @@
 #include "colors.h"
 #include "ticTacToeUtil.h"
 
-
-
-
 #define BUFFER_SIZE 1024
-
-// we know that global variables are bad idea, but only will be one of each and will be used in some methods
-
-
-
-
 
 void usage() {
 	cout << "Usage: ProposalDsmClient <port> <dns> <player name>" << endl;
@@ -119,7 +110,9 @@ int main(int argc, char** argv) {
             system("clear"); //*nix
             //system("cls"); //windows
             ttt.drawMatrix(); 
-            sleep(0.25);
+            
+            cout << GREEN_BOLD << "[WAITING A SECOND, PLEASE BE PATIENT...]" << COL_RESET << endl;
+            sleep(1);
             //2 - check if the game has finished(win, or not)
             
             if( win == -1)
@@ -173,7 +166,7 @@ int main(int argc, char** argv) {
             {
                 switch(win)
                 {
-                    case -1:
+                    case 0:
                     {
                          cout << YELLOW_BOLD << "NO BODY HAS WON THE GAME :(" << COL_RESET << endl;
                         break;
