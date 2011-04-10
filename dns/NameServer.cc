@@ -129,6 +129,7 @@ namespace PracticaCaso {
 							string ipPortTemp = delegateExternalDnsServer(p->second, dnsName);
 							// [DONE]TODO: cache the already resolved names in other DNS servers both in memory and sqlite3
                             this->sqliteMap->set(dnsName, ipPortTemp);
+                            this->dns2IpPortMap[dnsName] = ipPortTemp;
 							return ipPortTemp;
 						}
 					}
@@ -144,6 +145,7 @@ namespace PracticaCaso {
 						string ipPortTemp = delegateExternalDnsServer(this->dns2IpPortMap[segment], dnsName);
 						// [DONE]TODO: cache the already resolved names in other DNS servers both in memory and sqlite3
                         this->sqliteMap->set(dnsName, ipPortTemp);
+                        this->dns2IpPortMap[dnsName] = ipPortTemp;
 						return ipPortTemp;
 					} else {
 						npos = segment.find(".");
