@@ -210,7 +210,7 @@ namespace PracticaCaso {
                 DsmBlock blockMetadata = this->blockMetadataMap[blockId];
                 pthread_rwlock_unlock( &this->accessLock );
                 //end read
-				// Only the last dsm client node who put some data can then release it
+				// Only the last dsm client node who created can then release it
 				if (blockMetadata.lastAccessNode == nid) {
                 	(this->blockMetadataMap).erase(blockId);
 					vector<DsmBlock> blocksRequested = (this->dsmNodeMap[nid]).dsmBlocksRequested;
