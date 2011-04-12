@@ -374,8 +374,8 @@ namespace PracticaCaso {
 			cout << "translate: entering delegatemDNSCommunity" << endl;
 			// Query delegation. 
 			dnsValue = delegatemDNSCommunity(dnsName);
-			// Check eventual errors.
-			if (dnsValue.find("ERROR")==0) {
+            // Check eventual errors.
+			if (dnsValue.find("ERROR")>=0) {
 				dnsValue = "ERROR: domain cannot be resolved in NS " + this->domain + ": " + dnsName;
 			} else {
 				// If everything is ok, query caching and checkpointing.
