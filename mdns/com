@@ -6,4 +6,5 @@ com
 # servidores registrados
 # direcciones de servidores inferiores
 upv.com 127.0.0.1:8888
+horl.com 127.0.0.1:7777
 # direcciones de servidores superiores

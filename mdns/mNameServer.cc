@@ -172,6 +172,7 @@ namespace PracticaCaso {
 			ins >> command >> payload >> code;
 			//llamada a mdns_management
             this->client->mdns_management(command, payload, code);
+            memset(msgbuf,0,sizeof(msgbuf));
 		}	
 	}
 
@@ -205,10 +206,15 @@ namespace PracticaCaso {
         // And then check if the MDNS_RESPONSE corresponds to pendingQuery. Use random code.
         if((strcmp(this->pendingQueryCode.c_str(), code.c_str()) == 0) && !(this->satisfiedQuery))
         {
+            //snoopy cache
+            this->dns2IpPortMap[pendingQuery] = payload;
+            this->sqliteMap->set(pendingQuery, payload);
+            
             // satisfiedQuery establishes a default FIRST-FIT criterion. Other methods are welcome. */
             this->solvedQuery = payload;
             this->pendingQuery = "";
-            this->satisfiedQuery = true; 
+            this->satisfiedQuery = true;
+            
         }
         else
         {
