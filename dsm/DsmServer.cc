@@ -68,54 +68,61 @@ namespace PracticaCaso {
 
 	void DsmServer::dsm_exit(DsmNodeId nodeId) {
 		// Remove all the data structures created by this node
-		if (dsmNodeMap.find(nodeId) != dsmNodeMap.end()) {
+		//start read lock
+        pthread_rwlock_rdlock( &this->accessLock );
+        if (dsmNodeMap.find(nodeId) != dsmNodeMap.end()) {
+            //close read lock and start write lock
+            pthread_rwlock_unlock( &this->accessLock );
+            pthread_rwlock_wrlock( &this->accessLock );
 			--nodeCounter;
 			if (nodeCounter == 0) {
-                //write block (erase)
-                pthread_rwlock_wrlock( &this->accessLock );
                 for (int i=0; i<dsmNodeMap[nodeId].dsmBlocksRequested.size(); i++) {
 					(this->blockMetadataMap).erase(dsmNodeMap[nodeId].dsmBlocksRequested[i].blockId);
 					free(dsmNodeMap[nodeId].dsmBlocksRequested[i].addr);
 				}
-                pthread_rwlock_unlock( &this->accessLock );
-                // end write
-				
+
 			}
 			dsmNodeMap.erase(nodeId);
+            //close write block
+            pthread_rwlock_unlock( &this->accessLock );
 		}
+        else
+            //close read lock because maybe it doesn't enter in the if block
+            pthread_rwlock_unlock( &this->accessLock );
 	}
 	
 
 	void * DsmServer::dsm_malloc(DsmNodeId nid, string blockId, int size) {
-		if (this->dsmNodeMap.find(nid) != this->dsmNodeMap.end()) {
+        //start read lock 1
+        pthread_rwlock_rdlock( &this->accessLock );
+        if (this->dsmNodeMap.find(nid) != this->dsmNodeMap.end()) {
 			if (this->blockMetadataMap.find(blockId) == this->blockMetadataMap.end()) {
-				DsmBlock block;
-				//write????
+                //close read block 1
+                pthread_rwlock_unlock( &this->accessLock );
+                DsmBlock block;
+                //start write block 2
+                pthread_rwlock_wrlock( &this->accessLock );
                 block.addr = malloc(size);
 				if (block.addr != NULL) {
 					block.blockSize = size;
 					block.size = 0;
 					block.creatorNode = nid;
 					block.lastAccessNode = nid;
-					//write block (erase)
-                    pthread_rwlock_wrlock( &this->accessLock );
                     this->blockMetadataMap[blockId] = block;
-                    //end write block 
-                    pthread_rwlock_unlock( &this->accessLock );
 					DsmNodeMetadata metadata = this->dsmNodeMap[nid];
 					metadata.dsmBlocksRequested.push_back(block);
-					this->dsmNodeMap[nid] = metadata;				
+					this->dsmNodeMap[nid] = metadata;
 					return block.addr;
 				} else {
 					cerr << "ERROR: DMS Server ran out of memory!!!" << endl;
 					return 0;
 				}
+                //end write block 2
+                pthread_rwlock_unlock( &this->accessLock );
 			} else {
 				cerr << "WARNING: attempt to create block " << blockId << " already existing by " << nid << "!!!" << endl;
-				//read block
-                pthread_rwlock_rdlock( &this->accessLock );
                 DsmBlock tempBlock = this->blockMetadataMap[blockId];
-                //end read block
+                //close read block 1
                 pthread_rwlock_unlock( &this->accessLock );
                 
                 if (tempBlock.size < size) {
@@ -124,8 +131,11 @@ namespace PracticaCaso {
 				} else {
 					return tempBlock.addr;
 				}
-			}
+
+            }
 		} else {
+            //close read block 1
+            pthread_rwlock_unlock( &this->accessLock );
 			cerr << "ERROR: attempt to create block " << blockId << " by non-registered node " << nid << "!!!" << endl;
 			return 0;
 		}
@@ -133,34 +143,36 @@ namespace PracticaCaso {
 
 
 	bool DsmServer::dsm_put(DsmNodeId nid, string blockId, void * content, int size) {
-		if (this->blockMetadataMap.find(blockId) != this->blockMetadataMap.end()) {
+        //start read block 1
+        pthread_rwlock_rdlock( &this->accessLock );
+        if (this->blockMetadataMap.find(blockId) != this->blockMetadataMap.end()) {
 			bool dsmPutResult = false;
-			//read block
-            pthread_rwlock_rdlock( &this->accessLock );
             DsmBlock blockMetadata = this->blockMetadataMap[blockId];
-            pthread_rwlock_unlock( &this->accessLock );
-            //end read block
-            
             // We allow anybody to write over the blocks
-			
             if ( size <= blockMetadata.blockSize ) {
-				bzero(blockMetadata.addr, blockMetadata.blockSize);
+                //close read block 1
+                pthread_rwlock_unlock( &this->accessLock );
+                //write block 2
+                pthread_rwlock_wrlock( &this->accessLock );
+                bzero(blockMetadata.addr, blockMetadata.blockSize);
 				memcpy(blockMetadata.addr, content, size);
 				blockMetadata.size = size;
 				blockMetadata.lastAccessNode = nid;
-				//write block 
-                pthread_rwlock_wrlock( &this->accessLock );
                 this->blockMetadataMap[blockId] = blockMetadata;
-                //end write block
+                //end write block 2
                 pthread_rwlock_unlock( &this->accessLock );
                 dsmPutResult = true;
                 
 			}
             else {
+                //close read block 1
+                pthread_rwlock_unlock( &this->accessLock );
 				cerr << "ERROR: The node " << nid << " does not have write access!!!" << endl;
 			}
 			return dsmPutResult;
 		} else {
+            //close read block 1
+            pthread_rwlock_unlock( &this->accessLock );
 			cerr << "ERROR: blockId " + blockId + " does not exist" << endl;
 			return false;
 		}
@@ -186,55 +198,62 @@ namespace PracticaCaso {
 	}
 
 	DsmBlock DsmServer::dsm_get(DsmNodeId nid, string blockId) {
-		if (this->blockMetadataMap.find(blockId) != this->blockMetadataMap.end()) {
-            //read block
-            pthread_rwlock_rdlock( &this->accessLock );
+        //start read block 1
+        pthread_rwlock_rdlock( &this->accessLock );
+        if (this->blockMetadataMap.find(blockId) != this->blockMetadataMap.end()) {
             DsmBlock temp = this->blockMetadataMap[blockId];
+			//close read block 1
             pthread_rwlock_unlock( &this->accessLock );
-            //end read block
-			return temp;
+            return temp;
 		} else {
 			DsmBlock block;
 			block.blockId = "ERROR";
-			return block;
+			//close read block 1
+            pthread_rwlock_unlock( &this->accessLock );
+            return block;
 		}
 	}
 
-
 	bool DsmServer::dsm_free(DsmNodeId nid, string blockId) {
-		if (this->dsmNodeMap.find(nid) != this->dsmNodeMap.end()) {
+        //start read block 1
+        pthread_rwlock_rdlock( &this->accessLock );
+        if (this->dsmNodeMap.find(nid) != this->dsmNodeMap.end()) {
 			DsmNodeMetadata nodeMetadata = this->dsmNodeMap[nid];
 			if (this->blockMetadataMap.find(blockId) != this->blockMetadataMap.end()) {
-				//read block
-                pthread_rwlock_rdlock( &this->accessLock );
                 DsmBlock blockMetadata = this->blockMetadataMap[blockId];
-                pthread_rwlock_unlock( &this->accessLock );
-                //end read
 				// Only the last dsm client node who created can then release it
 				if (blockMetadata.lastAccessNode == nid) {
-                	(this->blockMetadataMap).erase(blockId);
+                    //close read block 1
+                    pthread_rwlock_unlock( &this->accessLock );
+                	//start write block 2
+                    pthread_rwlock_wrlock( &this->accessLock );
+                    (this->blockMetadataMap).erase(blockId);
 					vector<DsmBlock> blocksRequested = (this->dsmNodeMap[nid]).dsmBlocksRequested;
 					for (vector<DsmBlock>::iterator it = blocksRequested.begin(); it!=blocksRequested.end(); ++it) {
 						if ( (blockMetadata.creatorNode == it->creatorNode) && 
 							 (blockMetadata.blockSize == it->blockSize) && 
 							 (blockMetadata.addr == it->addr)
 							) {
-							//write block (erase)
-                            pthread_rwlock_wrlock( &this->accessLock );
                             blocksRequested.erase(it, ++it);
-							pthread_rwlock_unlock( &this->accessLock );
-                            //end write
                             (this->dsmNodeMap[nid]).dsmBlocksRequested = blocksRequested;
 							return true;
 						}
 					}
-                    
+                    //close write block 2
+                    pthread_rwlock_unlock( &this->accessLock );
 					return false;
 				} else {
+                    //close read block 1
+                    pthread_rwlock_unlock( &this->accessLock );
 					return false;
 				}
 			}
+            else
+                //close read block 1
+                pthread_rwlock_unlock( &this->accessLock );
 		} else {
+            //close read block 1
+            pthread_rwlock_unlock( &this->accessLock );
 			return false;
 		}
 	}
