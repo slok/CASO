@@ -100,25 +100,25 @@ namespace PracticaCaso {
                 //close read block 1
                 pthread_rwlock_unlock( &this->accessLock );
                 DsmBlock block;
-                //start write block 2
-                pthread_rwlock_wrlock( &this->accessLock );
                 block.addr = malloc(size);
 				if (block.addr != NULL) {
 					block.blockSize = size;
 					block.size = 0;
 					block.creatorNode = nid;
 					block.lastAccessNode = nid;
+                    //start write block 2
+                    pthread_rwlock_wrlock( &this->accessLock );
                     this->blockMetadataMap[blockId] = block;
 					DsmNodeMetadata metadata = this->dsmNodeMap[nid];
 					metadata.dsmBlocksRequested.push_back(block);
 					this->dsmNodeMap[nid] = metadata;
-					return block.addr;
+					//end write block 2
+                    pthread_rwlock_unlock( &this->accessLock );
+                    return block.addr;
 				} else {
 					cerr << "ERROR: DMS Server ran out of memory!!!" << endl;
 					return 0;
 				}
-                //end write block 2
-                pthread_rwlock_unlock( &this->accessLock );
 			} else {
 				cerr << "WARNING: attempt to create block " << blockId << " already existing by " << nid << "!!!" << endl;
                 DsmBlock tempBlock = this->blockMetadataMap[blockId];

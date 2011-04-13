@@ -1,0 +1,83 @@
+
+CASO Practice(2011)
+
+*Group: CASO-01
+-------------
+
+*Members:
+-------------
+    -Iraide Diaz Orueta []
+    -Xabier Larrakoetxae Gallego [78931774-Y]
+
+*Dependencies:
+-------------
+    -libcrypt(openssl)
+    
+*Compilation:
+-------------
+    -util:
+        $make
+        [If an error appears like this appears:
+            
+            g++ -fPIC -L../dsm -shared -lm -lpthread  -lesidedsm ticTacToeUtil.o -o  libcasotictactoe.so
+            /usr/lib64/gcc/x86_64-slackware-linux/4.5.1/../../../../x86_64-slackware-linux/bin/ld: cannot find -lesidedsm
+            collect2: ld devolvió el estado de salida 1
+            make: *** [libcasotictactoe.so] Error 1
+        
+        compile dsm, to compile some dependencies, and then again this. dsm also will give error, 
+        but compile again dns too after compiling util. This is because of the cross dependencies]
+    -dsm:
+        $make
+    -dns:
+        $make
+    -mdns:
+        $make
+
+*Executions
+-------------
+    -dns:
+        $ cd /home/slok/Desktop/CASO/src/dns
+        $ ./NameServer 4000 es
+        $ ./NameServer 1234 deusto.es
+        $ ./NameClient 4000 eside.deusto.es
+    -mdns:
+        $ cd /home/slok/Desktop/CASO/src/mdns
+        $ ./mNameServer 4000 es
+        $ ./mNameServer 5555 com
+        $ cd ../dns
+        $ ./NameClient 4000 upv.com
+        
+    -Dsm:
+        $ cd /home/slok/Desktop/CASO/src/mdns
+        $ ./mNameServer 4000 es
+        $ cd ../dsm
+        $ ./DsmServer 1234
+        $ ./DsmTimeServer 4000 deusto.es
+        $ ./DsmTimeClient 4000 deusto.es
+        
+    -Proposal1:
+        //copy the logins database
+        $ cp ../util/logins.db ../dns
+        
+        //or create
+        $ cd ../util
+        $ ./insertPasswordDB.bin 
+        $ ./getPasswordsDB.bin
+        
+        //execute the proposal
+        $ cd ../mdns
+        $ ./mNameServer 4000 es
+        $ cd  ../dns
+        $ ./ProposalDnsServer.bin 1234
+        $ ./ProposalDnsClient.bin 4000 deusto.es
+        
+    -proposal2:
+        $ cd /home/slok/Desktop/CASO/src/mdns
+        $ ./mNameServer 4000 es
+        $ cd ../dsm
+        $ ./DsmServer 1234
+        $ ./ProposalDsmReferee 4000 deusto.es
+        $ ./ProposalDsmClient 4000 deusto.es xabi
+        $ ./ProposalDsmClient 4000 deusto.es iraide
+        
+    
