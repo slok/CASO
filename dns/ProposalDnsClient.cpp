@@ -90,16 +90,16 @@ int main(int argc, char** argv) {
     ipAddressAndPort = client->receive();
     client->close();
     
-    //connect to the proposal server
-    ip = ipAddressAndPort.substr(0, ipAddressAndPort.find(":"));
-    port = atoi((ipAddressAndPort.substr(ipAddressAndPort.find(":")+1)).c_str());
-    client->connect(ip,port);
-    
     if (ipAddressAndPort.find("ERROR") == 0) {
         cout << "The DNS name " << dnsName << " could not be resolved." << endl;
     } 
     else 
-    {//////////////////Server Part/////////////////////
+    {
+        //connect to the proposal server
+        ip = ipAddressAndPort.substr(0, ipAddressAndPort.find(":"));
+        port = atoi((ipAddressAndPort.substr(ipAddressAndPort.find(":")+1)).c_str());
+        client->connect(ip,port);
+        //////////////////Server Part/////////////////////
         while(!exit)
         { 
             //reset bad command boolean
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
                 
                 //copy the string to have the original msg intact, the strtoken brokens
                 strcpy((char *)aux.c_str(),(char *)msg.c_str());
-                aux =  string(aux.c_str());
+                aux =  string(aux.c_str(), aux.size());
                 //split command
                 commandVec = extractCommandAndArgs(aux);
                 
