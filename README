@@ -21,14 +21,14 @@ CASO Practice(2011)
 *Group: CASO-01
 -------------
 
-*Git server:
+*Git repository:
 -------------
     - https://github.com/slok/CASO
 
 *Members:
 -------------
-    -Iraide Diaz Orueta [XXXXXXXXXX]
-    -Xabier Larrakoetxae Gallego [XXXXXXXXXX]
+    -Iraide Diaz Orueta [XXXXXXXX-X]
+    -Xabier Larrakoetxae Gallego [XXXXXXXX-X]
 
 *Dependencies:
 -------------
@@ -38,15 +38,15 @@ CASO Practice(2011)
 -------------
     -util:
         $make
-        [If an error appears like this appears:
+        [If an error like this appears:
             
             g++ -fPIC -L../dsm -shared -lm -lpthread  -lesidedsm ticTacToeUtil.o -o  libcasotictactoe.so
             /usr/lib64/gcc/x86_64-slackware-linux/4.5.1/../../../../x86_64-slackware-linux/bin/ld: cannot find -lesidedsm
             collect2: ld devolvió el estado de salida 1
             make: *** [libcasotictactoe.so] Error 1
         
-        compile dsm, to compile some dependencies, and then again this. dsm also will give error, 
-        but compile again dns too after compiling util. This is because of the cross dependencies]
+        First compile dsm, to compile some dependencies, and then compile again util. Generally, dsm will also give an error. To solve 
+        it, just compile again dsm after compiling util. This last is because of the cross dependencies]
     -dsm:
         $make
     -dns:
