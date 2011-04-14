@@ -159,22 +159,28 @@ bool firstTime(TicTacToeUtil ttt, int p1, int p2)
     //reset for first time (new player)  and save it if not again
     if(!ttt.getAgainFromServer())
     {
-        cout << CYAN_BOLD << p1 <<" | "<< p2 << COL_RESET << endl;
-        
+        string player1, player2;
+        player1 = ttt.getPlayerName1FromServer();
+        player2 = ttt.getPlayerName2FromServer();
         //no negative points in database
         if(p1 < 0)
             p1 = 0;
         if(p2 < 0)
             p2 = 0;
+        
+        cout << YELLOW_BOLD << "****************SCORES*******************" << COL_RESET << endl;
+        cout << YELLOW_BOLD << player1 << ": " << p1 << COL_RESET <<endl;
+        cout << YELLOW_BOLD << player2 << ": " << p2 << COL_RESET <<endl;
+        cout << YELLOW_BOLD << "*****************************************" << COL_RESET<< endl;
             
         cout << CYAN_BOLD << "INSERTING SCORES IN DATABASE..." << COL_RESET << endl;
         intStrAux.str("");
         intStrAux << p1;
-        SQLiteMap->set(ttt.getPlayerName1FromServer(), intStrAux.str());
+        SQLiteMap->set(player1, intStrAux.str());
         
         intStrAux.str("");
         intStrAux << p2;
-        SQLiteMap->set(ttt.getPlayerName2FromServer(), intStrAux.str());
+        SQLiteMap->set(player2, intStrAux.str());
         first = true;
     }
     delete SQLiteMap;
@@ -264,11 +270,13 @@ int main(int argc, char** argv) {
         
         if(first) //if is the first time of the game with new players then...
         {
+            //Reconnect the database
+            delete SQLiteMap;
+            SQLiteMap = new PracticaCaso::SQLiteMap("scores.db");
             
-            cout << CYAN_BOLD << "GETTING SCORES IN DATABASE..." << COL_RESET << endl;
+            //get the scores
+            cout << CYAN_BOLD << "GETTING SCORES FROM DATABASE..." << COL_RESET << endl;
             string aux = SQLiteMap->get(ttt.getPlayerName1FromServer());
-            
-            cout << CYAN_BOLD << aux << COL_RESET << endl;
             
             if(aux.c_str() > 0)
                 points1 = atoi(aux.c_str());
@@ -276,7 +284,6 @@ int main(int argc, char** argv) {
                 points1 = 0;
             
             aux = SQLiteMap->get(ttt.getPlayerName2FromServer());
-            cout << CYAN_BOLD << aux << COL_RESET << endl;
             if(aux.c_str() > 0)
                 points2 = atoi(aux.c_str());
             else
@@ -336,8 +343,6 @@ int main(int argc, char** argv) {
             }
             
         }
-        
-        cout << YELLOW << first << endl;
     }
     
     
