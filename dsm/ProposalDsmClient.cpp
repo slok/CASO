@@ -121,6 +121,9 @@ int main(int argc, char** argv) {
         //gameloop
         while(!exitLoop)
         {
+            cout << GREEN_BOLD << "[WAITING A SECOND, PLEASE BE PATIENT...]" << COL_RESET << endl;
+            sleep(1);
+            
             //1 - get basic variables(turn...)
             turn = ttt.getTurnFromServer();
             win = ttt.getWinFromServer();
@@ -129,8 +132,6 @@ int main(int argc, char** argv) {
             //system("cls"); //windows
             ttt.drawMatrix(); 
             
-            cout << GREEN_BOLD << "[WAITING A SECOND, PLEASE BE PATIENT...]" << COL_RESET << endl;
-            sleep(1);
             //2 - check if the game has finished(win, or not)
             
             if( win == -1)
