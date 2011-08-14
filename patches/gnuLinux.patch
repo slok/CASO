@@ -1,0 +1,63 @@
+diff -rupN src/dns/NameServer.h src_mod/dns/NameServer.h
+--- src/dns/NameServer.h	2011-08-11 18:35:33.000000000 +0200
++++ src_mod/dns/NameServer.h	2011-08-11 23:42:07.027000054 +0200
+@@ -30,7 +30,7 @@ namespace PracticaCaso
+ 			NameServer(const NameServer&);
+ 			NameServer & operator = (const NameServer &);
+ 			~NameServer();
+-			string NameServer::translate(string dnsEntry);
++			string translate(string dnsEntry); //modificaciones GNU/Linux
+ 			friend ostream & operator << (ostream &os, NameServer &n);
+ 
+ 	};
+diff -rupN src/util/MySh.h src_mod/util/MySh.h
+--- src/util/MySh.h	2011-08-11 18:35:33.000000000 +0200
++++ src_mod/util/MySh.h	2011-08-11 23:42:07.028000049 +0200
+@@ -5,6 +5,8 @@
+ 
+ #include <iostream>
+ #include <string>
++//modificaciones GNU/Linux
++#include <cstdlib>
+ 
+ extern "C" {
+ 	#include <errno.h>
+diff -rupN src/util/TcpListener.cc src_mod/util/TcpListener.cc
+--- src/util/TcpListener.cc	2011-08-11 18:35:33.000000000 +0200
++++ src_mod/util/TcpListener.cc	2011-08-11 23:42:07.029000046 +0200
+@@ -115,7 +115,7 @@ namespace PracticaCaso
+ 		
+ 		// Before writting the content, write the size of the buffer sent
+ 		char bytes2SendBuf[50];
+-		int n=sprintf (bytes2SendBuf, "$%d*", bytes2Send);
++		int n=sprintf (bytes2SendBuf, "$%ld*", bytes2Send); //modificaciones GNU/Linux
+ 		write(this->client_socket, string(bytes2SendBuf).c_str(), n);
+ 		do {
+ 			int bytesSentThisTime = write(this->client_socket, buffer+bytesSent, bytes2Send-bytesSent);
+diff -rupN src/util/TcpListener.h src_mod/util/TcpListener.h
+--- src/util/TcpListener.h	2011-08-11 18:35:33.000000000 +0200
++++ src_mod/util/TcpListener.h	2011-08-11 23:42:07.029000046 +0200
+@@ -15,6 +15,10 @@ extern "C" {
+ 	#include <stdlib.h>
+ 	#include </usr/include/signal.h>
+ 	#include <errno.h>
++    //modificaciones GNU/Linux
++    #include <strings.h>
++    #include <string.h>
++    #include <unistd.h>
+ }
+ 
+ #include <iostream>
+diff -rupN src/util/Thread.h src_mod/util/Thread.h
+--- src/util/Thread.h	2011-08-11 18:35:33.000000000 +0200
++++ src_mod/util/Thread.h	2011-08-11 23:42:07.030000045 +0200
+@@ -8,7 +8,8 @@ extern "C" {
+ 	#include <errno.h>
+ }
+ #include <iostream>
+-
++//modificaciones GNU/Linux
++#include <cstdlib>
+ namespace PracticaCaso
+ {
+ 	void *thread_listener(void *arg);
