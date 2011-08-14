@@ -27,22 +27,25 @@ Dependencies
 Build
 ------
     
-    $ mkdir ./build
+    $ mkdir ./build && cd ./build
     $ cmake ..  
     $ make
     
 Execute
 -------
+
+    $ cd [our build directory of cmake]
+
 ###dns:
 
-    $ cd /home/slok/Desktop/CASO/src/dns
+    $ cd ./dns
     $ ./NameServer 4000 es
     $ ./NameServer 1234 deusto.es
     $ ./NameClient 4000 eside.deusto.es
 
 ###mdns:
 
-    $ cd /home/slok/Desktop/CASO/src/mdns
+    $ cd ./mdns
     $ ./mNameServer 4000 es
     $ ./mNameServer 5555 com
     $ cd ../dns
@@ -50,7 +53,7 @@ Execute
 
 ###Dsm:
 
-    $ cd /home/slok/Desktop/CASO/src/mdns
+    $ cd ./mdns
     $ ./mNameServer 4000 es
     $ cd ../dsm
     $ ./DsmServer 1234
@@ -58,7 +61,8 @@ Execute
     $ ./DsmTimeClient 4000 deusto.es
 
 ###Proposal1:
-
+    
+    cd ./dns
     //you can create logins with the utility
     $ cd ../util
     $ ./insertPasswordDB.bin 
@@ -73,7 +77,7 @@ Execute
 
 ###proposal2:
 
-    $ cd /home/slok/Desktop/CASO/src/mdns
+    $ cd ./mdns
     $ ./mNameServer 4000 es
     $ cd ../dsm
     $ ./DsmServer 1234
