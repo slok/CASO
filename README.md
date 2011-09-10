@@ -1,4 +1,3 @@
-
 CASO Practice(2011)
 ===================
 
@@ -13,7 +12,7 @@ Git repository
 Authors
 ---------
 * Iraide (Sharem) Diaz Orueta (iraide.diaz [at] gmail.com)
-* Xabier (sLoK) Larrakoetxae Gallego (slok69 [at] gmail.com)
+* Xabier (sLoK) Larrakoetxea Gallego (slok69 [at] gmail.com)
 
 Restrictions
 ------------
